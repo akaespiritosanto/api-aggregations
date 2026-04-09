@@ -1,0 +1,123 @@
+<?xml version="1.0"?>
+<doc>
+    <assembly>
+        <name>api-agregations</name>
+    </assembly>
+    <members>
+        <member name="M:api_aggregations.Controllers.ProdutoReservadoController.GetAll(api_aggregations.Dtos.ProdutoReservadoQuery,System.Threading.CancellationToken)">
+            <summary>
+            Returns a paginated list of reserved products.
+            </summary>
+            <param name="query">Pagination + optional filters.</param>
+            <param name="cancellationToken">Request cancellation token.</param>
+            <returns>A paged result of <see cref="T:api_aggregations.Models.ProdutoReservado"/> items.</returns>
+            <response code="200">The paged result.</response>
+            <response code="400">Invalid pagination parameters.</response>
+            <response code="500">Unexpected error.</response>
+        </member>
+        <member name="M:api_aggregations.Controllers.ProdutoReservadoController.GetById(System.Int32,System.Threading.CancellationToken)">
+            <summary>
+            Returns a reserved product by id.
+            </summary>
+            <param name="id">Reserved product id.</param>
+            <param name="cancellationToken">Request cancellation token.</param>
+            <returns>The <see cref="T:api_aggregations.Models.ProdutoReservado"/>.</returns>
+            <response code="200">The reserved product.</response>
+            <response code="404">Not found.</response>
+            <response code="500">Unexpected error.</response>
+        </member>
+        <member name="M:api_aggregations.Controllers.ProdutoReservadoController.Create(api_aggregations.Models.ProdutoReservado,System.Threading.CancellationToken)">
+            <summary>
+            Creates a new reserved product.
+            </summary>
+            <param name="produtoReservado">The reserved product to create.</param>
+            <param name="cancellationToken">Request cancellation token.</param>
+            <returns>The created <see cref="T:api_aggregations.Models.ProdutoReservado"/>.</returns>
+            <response code="201">Created successfully.</response>
+            <response code="500">Unexpected error.</response>
+        </member>
+        <member name="M:api_aggregations.Controllers.ProdutoReservadoController.Update(System.Int32,api_aggregations.Models.ProdutoReservado,System.Threading.CancellationToken)">
+            <summary>
+            Updates an existing reserved product.
+            </summary>
+            <param name="id">Reserved product id.</param>
+            <param name="produtoReservado">New values.</param>
+            <param name="cancellationToken">Request cancellation token.</param>
+            <returns>The updated <see cref="T:api_aggregations.Models.ProdutoReservado"/>.</returns>
+            <response code="200">Updated successfully.</response>
+            <response code="404">Not found.</response>
+            <response code="500">Unexpected error.</response>
+        </member>
+        <member name="M:api_aggregations.Controllers.ProdutoReservadoController.Delete(System.Int32,System.Threading.CancellationToken)">
+            <summary>
+            Deletes a reserved product by id.
+            </summary>
+            <param name="id">Reserved product id.</param>
+            <param name="cancellationToken">Request cancellation token.</param>
+            <returns>No content.</returns>
+            <response code="204">Deleted successfully.</response>
+            <response code="404">Not found.</response>
+            <response code="500">Unexpected error.</response>
+        </member>
+        <member name="M:api_aggregations.Controllers.ReservaController.GetAll(api_aggregations.Dtos.ReservaQuery,System.Threading.CancellationToken)">
+            <summary>
+            Returns a paginated list of reservas.
+            </summary>
+            <param name="query">Pagination + optional filters.</param>
+            <param name="cancellationToken">Request cancellation token.</param>
+            <returns>A paged result of <see cref="T:api_aggregations.Models.Reserva"/> items.</returns>
+            <response code="200">The paged result.</response>
+            <response code="400">Invalid pagination parameters.</response>
+            <response code="500">Unexpected error.</response>
+        </member>
+        <member name="M:api_aggregations.Controllers.ReservaController.GetById(System.Int32,System.Threading.CancellationToken)">
+            <summary>
+            Returns a reserva by id.
+            </summary>
+            <param name="id">Reserva id.</param>
+            <param name="cancellationToken">Request cancellation token.</param>
+            <returns>The <see cref="T:api_aggregations.Models.Reserva"/>.</returns>
+            <response code="200">The reserva.</response>
+            <response code="404">Not found.</response>
+            <response code="500">Unexpected error.</response>
+        </member>
+        <member name="M:api_aggregations.Controllers.ReservaController.Create(api_aggregations.Models.Reserva,System.Threading.CancellationToken)">
+            <summary>
+            Creates a new reserva.
+            </summary>
+            <param name="reserva">The reserva to create.</param>
+            <param name="cancellationToken">Request cancellation token.</param>
+            <returns>The created <see cref="T:api_aggregations.Models.Reserva"/>.</returns>
+            <response code="201">Created successfully.</response>
+            <response code="500">Unexpected error.</response>
+        </member>
+        <member name="M:api_aggregations.Controllers.ReservaController.Update(System.Int32,api_aggregations.Models.Reserva,System.Threading.CancellationToken)">
+            <summary>
+            Updates an existing reserva.
+            </summary>
+            <param name="id">Reserva id.</param>
+            <param name="reserva">New values.</param>
+            <param name="cancellationToken">Request cancellation token.</param>
+            <returns>The updated <see cref="T:api_aggregations.Models.Reserva"/>.</returns>
+            <response code="200">Updated successfully.</response>
+            <response code="404">Not found.</response>
+            <response code="500">Unexpected error.</response>
+        </member>
+        <member name="M:api_aggregations.Controllers.ReservaController.Delete(System.Int32,System.Threading.CancellationToken)">
+            <summary>
+            Deletes a reserva by id.
+            </summary>
+            <param name="id">Reserva id.</param>
+            <param name="cancellationToken">Request cancellation token.</param>
+            <returns>No content.</returns>
+            <response code="204">Deleted successfully.</response>
+            <response code="404">Not found.</response>
+            <response code="500">Unexpected error.</response>
+        </member>
+        <member name="T:Program">
+            <summary>
+            Auto-generated public partial Program class for top-level statement apps.
+            </summary>
+        </member>
+    </members>
+</doc>
