@@ -11,7 +11,11 @@ var builder = WebApplication.CreateBuilder(args);
 
 Env.Load();
 
-var connString = Environment.GetEnvironmentVariable("SECRET");
+var connString = Environment.GetEnvironmentVariable("SECRET")?.Trim().Trim('"');
+if (string.IsNullOrWhiteSpace(connString))
+{
+    throw new InvalidOperationException("Missing SQL Server connection string. Set env var SECRET (or provide it via .env).");
+}
 
 builder.Services.AddControllers(options =>
 {
@@ -32,6 +36,12 @@ builder.Services.AddScoped<ProdutoReservadoService>();
 builder.Services.AddScoped<ReservaService>();
 
 var app = builder.Build();
+
+using (var scope = app.Services.CreateScope())
+{
+    var dbContext = scope.ServiceProvider.GetRequiredService<AppDbContext>();
+    await DbScriptsRunner.ApplyPendingAsync(dbContext, app.Logger);
+}
 
 if (app.Environment.IsDevelopment())
 {

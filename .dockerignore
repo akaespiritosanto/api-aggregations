@@ -1,0 +1,12 @@
+**/.git
+**/.vs
+**/.vscode
+**/bin
+**/obj
+
+.env
+.dotnet
+.dotnet_home
+
+api-agregations.Tests
+
