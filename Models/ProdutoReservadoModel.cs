@@ -27,32 +27,32 @@ public class ProdutoReservado
     public int? n_pessoas { get; set; }
     public int quantidade { get; set; }
 
-    public float? desconto { get; set; }
-    public float valor_tarifa { get; set; }
-    public float valor_comissao { get; set; }
-    public float valor_taxas { get; set; }
+    public double? desconto { get; set; }
+    public double valor_tarifa { get; set; }
+    public double valor_comissao { get; set; }
+    public double valor_taxas { get; set; }
 
     public string ref_taxas { get; set; }
 
     public int id_factura { get; set; }
 
-    public float valor_tarifa_origem { get; set; }
+    public double valor_tarifa_origem { get; set; }
 
     public short? tipo_tarifa { get; set; }
 
     public DateTime data_cancelamento { get; set; }
 
-    public float cancel_fee_aplicado { get; set; }
+    public double cancel_fee_aplicado { get; set; }
 
     public DateTime data_actualizacao { get; set; }
     public DateTime data_criacao { get; set; }
 
     public DateTime? checkin_hora { get; set; }
 
-    public float total_imp_sob_taxas_tarifa { get; set; }
-    public float total_imp_sob_supl { get; set; }
-    public float total_impostos { get; set; }
-    public float total_suplementos { get; set; }
+    public double total_imp_sob_taxas_tarifa { get; set; }
+    public double total_imp_sob_supl { get; set; }
+    public double total_impostos { get; set; }
+    public double total_suplementos { get; set; }
 
     public string id_externo { get; set; }
     public int sistema_externo { get; set; }
@@ -90,5 +90,5 @@ public class ProdutoReservado
     public DateTime data_embarque { get; set; }
     public DateTime data_desembarque { get; set; }
 
-    public float descontoAutomatico { get; set; }
+    public double descontoAutomatico { get; set; }
 }

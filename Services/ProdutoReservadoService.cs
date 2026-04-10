@@ -112,16 +112,14 @@ public class ProdutoReservadoService
 
     public async Task DeleteAsync(int id, CancellationToken cancellationToken)
     {
-        var existing = await _context.ProdutoReservado
-            .FirstOrDefaultAsync(p => p.id == id, cancellationToken);
+        var deleted = await _context.ProdutoReservado
+            .Where(p => p.id == id)
+            .ExecuteDeleteAsync(cancellationToken);
 
-        if (existing is null)
+        if (deleted == 0)
         {
             throw new NotFoundException($"ProdutoReservado with id '{id}' was not found.");
         }
-
-        _context.ProdutoReservado.Remove(existing);
-        await _context.SaveChangesAsync(cancellationToken);
 
         _logger.LogInformation("Deleted ProdutoReservado with id {Id}", id);
     }

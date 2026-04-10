@@ -13,7 +13,7 @@ using System.Reflection;
 [assembly: System.Reflection.AssemblyCompanyAttribute("api-agregations.Tests")]
 [assembly: System.Reflection.AssemblyConfigurationAttribute("Debug")]
 [assembly: System.Reflection.AssemblyFileVersionAttribute("1.0.0.0")]
-[assembly: System.Reflection.AssemblyInformationalVersionAttribute("1.0.0+4d76e38883091c477b60bb3afdf4f3e2df378893")]
+[assembly: System.Reflection.AssemblyInformationalVersionAttribute("1.0.0+9877a931d12027a5f76f9414d583bd27951f119d")]
 [assembly: System.Reflection.AssemblyProductAttribute("api-agregations.Tests")]
 [assembly: System.Reflection.AssemblyTitleAttribute("api-agregations.Tests")]
 [assembly: System.Reflection.AssemblyVersionAttribute("1.0.0.0")]

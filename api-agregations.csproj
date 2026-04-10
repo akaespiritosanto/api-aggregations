@@ -21,6 +21,8 @@
 
   <ItemGroup>
     <Compile Remove="api-agregations.Tests\\**\\*.cs" />
+    <Content Remove="api-agregations.Tests\\**" />
+    <None Remove="api-agregations.Tests\\**" />
   </ItemGroup>
 
   <ItemGroup>
