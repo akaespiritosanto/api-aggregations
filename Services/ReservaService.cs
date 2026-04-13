@@ -17,6 +17,91 @@ public class ReservaService
         _logger = logger;
     }
     
+    public async Task<List<ReservaTotalsDto>> GetTotalsAsync(int? ano, int? mes, int? dia, int? idVendedor, CancellationToken cancellationToken)
+    {
+        ValidateDateParts(ano, mes, dia);
+
+        IQueryable<Reserva> reservas = _context.Reserva.AsNoTracking();
+
+        if (idVendedor is not null)
+        {
+            reservas = reservas.Where(r => r.id_vendedor == idVendedor.Value);
+        }
+
+        // Prefer "data_pedido" (when it exists). If it's null, fall back to "data_actualizacao" so every row has a date.
+        var reservasComData = reservas.Select(r => new
+        {
+            Data = r.data_pedido ?? r.data_actualizacao,
+            r.id_vendedor
+        });
+
+        if (ano is not null)
+        {
+            reservasComData = reservasComData.Where(r => r.Data.Year == ano.Value);
+        }
+
+        if (mes is not null)
+        {
+            reservasComData = reservasComData.Where(r => r.Data.Month == mes.Value);
+        }
+
+        if (dia is not null)
+        {
+            reservasComData = reservasComData.Where(r => r.Data.Day == dia.Value);
+        }
+
+        if (mes is null)
+        {
+            return await reservasComData
+                .GroupBy(r => new { ano = r.Data.Year, r.id_vendedor })
+                .Select(g => new ReservaTotalsDto
+                {
+                    ano = g.Key.ano,
+                    mes = null,
+                    dia = null,
+                    id_vendedor = g.Key.id_vendedor,
+                    quantidade = g.Count()
+                })
+                .OrderBy(x => x.ano)
+                .ThenBy(x => x.id_vendedor)
+                .ToListAsync(cancellationToken);
+        }
+
+        if (dia is null)
+        {
+            return await reservasComData
+                .GroupBy(r => new { ano = r.Data.Year, mes = r.Data.Month, r.id_vendedor })
+                .Select(g => new ReservaTotalsDto
+                {
+                    ano = g.Key.ano,
+                    mes = g.Key.mes,
+                    dia = null,
+                    id_vendedor = g.Key.id_vendedor,
+                    quantidade = g.Count()
+                })
+                .OrderBy(x => x.ano)
+                .ThenBy(x => x.mes)
+                .ThenBy(x => x.id_vendedor)
+                .ToListAsync(cancellationToken);
+        }
+
+        return await reservasComData
+            .GroupBy(r => new { ano = r.Data.Year, mes = r.Data.Month, dia = r.Data.Day, r.id_vendedor })
+            .Select(g => new ReservaTotalsDto
+            {
+                ano = g.Key.ano,
+                mes = g.Key.mes,
+                dia = g.Key.dia,
+                id_vendedor = g.Key.id_vendedor,
+                quantidade = g.Count()
+            })
+            .OrderBy(x => x.ano)
+            .ThenBy(x => x.mes)
+            .ThenBy(x => x.dia)
+            .ThenBy(x => x.id_vendedor)
+            .ToListAsync(cancellationToken);
+    }
+
     public async Task<PagedResult<Reserva>> GetAllAsync(ReservaQuery query, CancellationToken cancellationToken)
     {
         ValidatePagination(query);
@@ -134,6 +219,43 @@ public class ReservaService
         if (query.PageSize > 100)
         {
             throw new BadRequestException("PageSize must be less than or equal to 100.");
+        }
+    }
+
+    private static void ValidateDateParts(int? ano, int? mes, int? dia)
+    {
+        if (ano is not null && ano < 1)
+        {
+            throw new BadRequestException("ano must be a valid year.");
+        }
+
+        if (mes is not null && (mes < 1 || mes > 12))
+        {
+            throw new BadRequestException("mes must be between 1 and 12.");
+        }
+
+        if (dia is not null && (dia < 1 || dia > 31))
+        {
+            throw new BadRequestException("dia must be between 1 and 31.");
+        }
+
+        if (mes is not null && ano is null)
+        {
+            throw new BadRequestException("When using mes, you must also provide ano.");
+        }
+
+        if (dia is not null && (ano is null || mes is null))
+        {
+            throw new BadRequestException("When using dia, you must also provide ano and mes.");
+        }
+
+        if (ano is not null && mes is not null && dia is not null)
+        {
+            var maxDay = DateTime.DaysInMonth(ano.Value, mes.Value);
+            if (dia.Value > maxDay)
+            {
+                throw new BadRequestException($"dia must be between 1 and {maxDay} for ano={ano} and mes={mes}.");
+            }
         }
     }
 }

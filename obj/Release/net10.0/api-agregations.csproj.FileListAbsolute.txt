@@ -163,5 +163,5 @@ C:\Users\afons\Desktop\api-aggregations\obj\Release\net10.0\api-agregations.xml
 C:\Users\afons\Desktop\api-aggregations\obj\Release\net10.0\api-agregations.pdb
 C:\Users\afons\Desktop\api-aggregations\obj\Release\net10.0\api-agregations.genruntimeconfig.cache
 C:\Users\afons\Desktop\api-aggregations\obj\Release\net10.0\ref\api-agregations.dll
-C:\Users\afons\Desktop\api-aggregations\bin\Release\net10.0\api-agregations.Tests\obj\api-agregations.Tests.csproj.nuget.dgspec.json
-C:\Users\afons\Desktop\api-aggregations\bin\Release\net10.0\api-agregations.Tests\obj\project.assets.json
+C:\Users\afons\Desktop\api-aggregations\bin\Release\net10.0\DbScripts\20260410_01_DDL_initial_schema.sql
+C:\Users\afons\Desktop\api-aggregations\bin\Release\net10.0\DbScripts\20260410_02_DDL_alter_produtoreservado_real_to_float.sql

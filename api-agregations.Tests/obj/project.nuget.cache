@@ -67,15 +67,5 @@
     "C:\\Users\\afons\\Desktop\\api-aggregations\\.dotnet_home\\.nuget\\packages\\xunit.extensibility.execution\\2.9.3\\xunit.extensibility.execution.2.9.3.nupkg.sha512",
     "C:\\Users\\afons\\Desktop\\api-aggregations\\.dotnet_home\\.nuget\\packages\\xunit.runner.visualstudio\\3.1.4\\xunit.runner.visualstudio.3.1.4.nupkg.sha512"
   ],
-  "logs": [
-    {
-      "code": "NU1900",
-      "level": "Warning",
-      "message": "Error occurred while getting package vulnerability data: Unable to load the service index for source https://api.nuget.org/v3/index.json.",
-      "projectPath": "C:\\Users\\afons\\Desktop\\api-aggregations\\api-agregations.Tests\\api-agregations.Tests.csproj",
-      "warningLevel": 1,
-      "filePath": "C:\\Users\\afons\\Desktop\\api-aggregations\\api-agregations.Tests\\api-agregations.Tests.csproj",
-      "targetGraphs": []
-    }
-  ]
+  "logs": []
 }

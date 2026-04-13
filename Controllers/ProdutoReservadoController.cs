@@ -19,6 +19,30 @@ public class ProdutoReservadoController : ControllerBase
     }
 
     /// <summary>
+    /// Returns totals of reserved products, grouped by ano/mes/dia and id_entidade.
+    /// </summary>
+    /// <param name="ano">Optional year filter (ex: 2026).</param>
+    /// <param name="mes">Optional month filter (1-12). If provided, ano is required.</param>
+    /// <param name="dia">Optional day filter (1-31). If provided, ano and mes are required.</param>
+    /// <param name="id_entidade">Optional "entidade" filter.</param>
+    /// <param name="cancellationToken">Request cancellation token.</param>
+    /// <returns>A list of grouped totals.</returns>
+    [HttpGet("totals")]
+    [ProducesResponseType(typeof(List<ProdutoReservadoTotalsDto>), StatusCodes.Status200OK)]
+    [ProducesResponseType(typeof(ProblemDetails), StatusCodes.Status400BadRequest)]
+    [ProducesResponseType(typeof(ProblemDetails), StatusCodes.Status500InternalServerError)]
+    public async Task<ActionResult<List<ProdutoReservadoTotalsDto>>> GetTotals(
+        [FromQuery] int? ano,
+        [FromQuery] int? mes,
+        [FromQuery] int? dia,
+        [FromQuery] int? id_entidade,
+        CancellationToken cancellationToken)
+    {
+        var result = await _service.GetTotalsAsync(ano, mes, dia, id_entidade, cancellationToken);
+        return Ok(result);
+    }
+
+    /// <summary>
     /// Returns a paginated list of reserved products.
     /// </summary>
     /// <param name="query">Pagination + optional filters.</param>
