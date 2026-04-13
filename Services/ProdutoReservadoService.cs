@@ -19,6 +19,108 @@ public class ProdutoReservadoService
     
     // ############################################################################################################
 
+    public async Task<List<ProdutoReservadoTotalsDto>> GetTotalsAsync(int? ano, int? mes, int? dia, int? idEntidade, CancellationToken cancellationToken)
+    {
+        ValidateDateParts(ano, mes, dia);
+
+        IQueryable<ProdutoReservado> produtos = _context.ProdutoReservado.AsNoTracking();
+
+        if (idEntidade is not null)
+        {
+            produtos = produtos.Where(p => p.id_entidade == idEntidade.Value);
+        }
+
+        var produtosComData = produtos.Select(p => new
+        {
+            Data = p.data_criacao,
+            p.id_entidade,
+            p.quantidade,
+            p.valor_tarifa,
+            p.valor_comissao,
+            p.valor_taxas,
+            p.desconto,
+            p.descontoAutomatico
+        });
+
+        if (ano is not null)
+        {
+            produtosComData = produtosComData.Where(p => p.Data.Year == ano.Value);
+        }
+
+        if (mes is not null)
+        {
+            produtosComData = produtosComData.Where(p => p.Data.Month == mes.Value);
+        }
+
+        if (dia is not null)
+        {
+            produtosComData = produtosComData.Where(p => p.Data.Day == dia.Value);
+        }
+
+        if (mes is null)
+        {
+            return await produtosComData
+                .GroupBy(p => new { ano = p.Data.Year, p.id_entidade })
+                .Select(g => new ProdutoReservadoTotalsDto
+                {
+                    ano = g.Key.ano,
+                    mes = null,
+                    dia = null,
+                    id_entidade = g.Key.id_entidade,
+                    quantidade = g.Sum(x => x.quantidade),
+                    valor_tarifa = g.Sum(x => x.valor_tarifa),
+                    valor_comissao = g.Sum(x => x.valor_comissao),
+                    valor_taxas = g.Sum(x => x.valor_taxas),
+                    valor_descontos = g.Sum(x => (x.desconto ?? 0) + x.descontoAutomatico)
+                })
+                .OrderBy(x => x.ano)
+                .ThenBy(x => x.id_entidade)
+                .ToListAsync(cancellationToken);
+        }
+
+        if (dia is null)
+        {
+            return await produtosComData
+                .GroupBy(p => new { ano = p.Data.Year, mes = p.Data.Month, p.id_entidade })
+                .Select(g => new ProdutoReservadoTotalsDto
+                {
+                    ano = g.Key.ano,
+                    mes = g.Key.mes,
+                    dia = null,
+                    id_entidade = g.Key.id_entidade,
+                    quantidade = g.Sum(x => x.quantidade),
+                    valor_tarifa = g.Sum(x => x.valor_tarifa),
+                    valor_comissao = g.Sum(x => x.valor_comissao),
+                    valor_taxas = g.Sum(x => x.valor_taxas),
+                    valor_descontos = g.Sum(x => (x.desconto ?? 0) + x.descontoAutomatico)
+                })
+                .OrderBy(x => x.ano)
+                .ThenBy(x => x.mes)
+                .ThenBy(x => x.id_entidade)
+                .ToListAsync(cancellationToken);
+        }
+
+        return await produtosComData
+            .GroupBy(p => new { ano = p.Data.Year, mes = p.Data.Month, dia = p.Data.Day, p.id_entidade })
+            .Select(g => new ProdutoReservadoTotalsDto
+            {
+                ano = g.Key.ano,
+                mes = g.Key.mes,
+                dia = g.Key.dia,
+                id_entidade = g.Key.id_entidade,
+                quantidade = g.Sum(x => x.quantidade),
+                valor_tarifa = g.Sum(x => x.valor_tarifa),
+                valor_comissao = g.Sum(x => x.valor_comissao),
+                valor_taxas = g.Sum(x => x.valor_taxas),
+                valor_descontos = g.Sum(x => (x.desconto ?? 0) + x.descontoAutomatico)
+            })
+            .OrderBy(x => x.ano)
+            .ThenBy(x => x.mes)
+            .ThenBy(x => x.dia)
+            .ThenBy(x => x.id_entidade)
+            .ToListAsync(cancellationToken);
+    }
+
     public async Task<PagedResult<ProdutoReservado>> GetAllAsync(ProdutoReservadoQuery query, CancellationToken cancellationToken)
     {
         ValidatePagination(query);
@@ -142,4 +244,40 @@ public class ProdutoReservadoService
         }
     }
 
+    private static void ValidateDateParts(int? ano, int? mes, int? dia)
+    {
+        if (ano is not null && ano < 1)
+        {
+            throw new BadRequestException("ano must be a valid year.");
+        }
+
+        if (mes is not null && (mes < 1 || mes > 12))
+        {
+            throw new BadRequestException("mes must be between 1 and 12.");
+        }
+
+        if (dia is not null && (dia < 1 || dia > 31))
+        {
+            throw new BadRequestException("dia must be between 1 and 31.");
+        }
+
+        if (mes is not null && ano is null)
+        {
+            throw new BadRequestException("When using mes, you must also provide ano.");
+        }
+
+        if (dia is not null && (ano is null || mes is null))
+        {
+            throw new BadRequestException("When using dia, you must also provide ano and mes.");
+        }
+
+        if (ano is not null && mes is not null && dia is not null)
+        {
+            var maxDay = DateTime.DaysInMonth(ano.Value, mes.Value);
+            if (dia.Value > maxDay)
+            {
+                throw new BadRequestException($"dia must be between 1 and {maxDay} for ano={ano} and mes={mes}.");
+            }
+        }
+    }
 }

@@ -61,5 +61,44 @@ public class ReservaServiceTests
         await Assert.ThrowsAsync<BadRequestException>(() =>
             service.GetAllAsync(new ReservaQuery { PageNumber = 1, PageSize = 0 }, CancellationToken.None));
     }
-}
 
+    [Fact]
+    public async Task GetTotalsAsync_GroupsByYear_WhenMesIsNull()
+    {
+        await using var context = TestDbContextFactory.Create();
+
+        var r1 = TestDataFactory.CreateReserva(id: 1, numero: "A-1", estado: 1);
+        r1.id_vendedor = 1;
+        r1.data_pedido = new DateTime(2026, 1, 1);
+
+        var r2 = TestDataFactory.CreateReserva(id: 2, numero: "A-2", estado: 1);
+        r2.id_vendedor = 1;
+        r2.data_pedido = new DateTime(2026, 1, 2);
+
+        var r3 = TestDataFactory.CreateReserva(id: 3, numero: "B-1", estado: 1);
+        r3.id_vendedor = 2;
+        r3.data_pedido = new DateTime(2026, 1, 1);
+
+        var r4 = TestDataFactory.CreateReserva(id: 4, numero: "OLD", estado: 1);
+        r4.id_vendedor = 1;
+        r4.data_pedido = new DateTime(2025, 12, 31);
+
+        context.Reserva.AddRange(r1, r2, r3, r4);
+        await context.SaveChangesAsync();
+
+        var service = new ReservaService(context, NullLogger<ReservaService>.Instance);
+
+        var result = await service.GetTotalsAsync(ano: 2026, mes: null, dia: null, idVendedor: null, CancellationToken.None);
+
+        Assert.Equal(2, result.Count);
+
+        var vendedor1 = result.Single(x => x.id_vendedor == 1);
+        Assert.Equal(2, vendedor1.quantidade);
+        Assert.Equal(2026, vendedor1.ano);
+        Assert.Null(vendedor1.mes);
+        Assert.Null(vendedor1.dia);
+
+        var vendedor2 = result.Single(x => x.id_vendedor == 2);
+        Assert.Equal(1, vendedor2.quantidade);
+    }
+}
