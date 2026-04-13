@@ -46,18 +46,6 @@ Swagger (em `Development`):
 dotnet test
 ```
 
-## Scripts de base de dados
-
-Os scripts SQL de criação/alteração estão em `DbScripts/` e seguem o formato:
-
-`yyyyMMdd_<daily sequential number>_<DDL/DML>_<descriptive_text>.sql`
-
-Ex.: `20260410_01_DDL_initial_schema.sql`
-
-Ao arrancar, a API aplica automaticamente os scripts pendentes (por ordem do nome do ficheiro) e regista a execução na tabela `dbo.__DbScriptsHistory`.
-
-Nota: scripts já aplicados **não devem ser alterados**; cria sempre um novo ficheiro para mudanças adicionais.
-
 ## Docker
 
 Build + run (lê a variável `SECRET` via `.env`):

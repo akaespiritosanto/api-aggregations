@@ -37,12 +37,6 @@ builder.Services.AddScoped<ReservaService>();
 
 var app = builder.Build();
 
-using (var scope = app.Services.CreateScope())
-{
-    var dbContext = scope.ServiceProvider.GetRequiredService<AppDbContext>();
-    await DbScriptsRunner.ApplyPendingAsync(dbContext, app.Logger);
-}
-
 if (app.Environment.IsDevelopment())
 {
     app.UseSwagger();

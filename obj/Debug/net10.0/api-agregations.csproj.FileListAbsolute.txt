@@ -164,4 +164,4 @@ C:\Users\afons\Desktop\api-aggregations\obj\Debug\net10.0\api-agregations.xml
 C:\Users\afons\Desktop\api-aggregations\obj\Debug\net10.0\api-agregations.pdb
 C:\Users\afons\Desktop\api-aggregations\obj\Debug\net10.0\api-agregations.genruntimeconfig.cache
 C:\Users\afons\Desktop\api-aggregations\obj\Debug\net10.0\ref\api-agregations.dll
-C:\Users\afons\Desktop\api-aggregations\bin\Debug\net10.0\DbScripts\20260410_02_alter_produtoreservado_real_to_float.sql
+C:\Users\afons\Desktop\api-aggregations\bin\Debug\net10.0\DbScripts\20260410_02_DDL_alter_produtoreservado_real_to_float.sql
