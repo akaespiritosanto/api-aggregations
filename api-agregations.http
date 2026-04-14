@@ -1,8 +1,20 @@
 @api_agregations_HostAddress = http://localhost:5092
+@apiKey = your-api-key-here
 
 GET {{api_agregations_HostAddress}}/produtoreservado/
 Accept: application/json
+X-API-KEY: {{apiKey}}
 
 ###
+
+GET {{api_agregations_HostAddress}}/produtoreservado/totals?ano=2026&mes=1
+Accept: application/json
+X-API-KEY: {{apiKey}}
+
+###
+
+GET {{api_agregations_HostAddress}}/reserva/totals?ano=2026
+Accept: application/json
+X-API-KEY: {{apiKey}}
 
 

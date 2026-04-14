@@ -3208,7 +3208,7 @@
     ]
   },
   "packageFolders": {
-    "C:\\Users\\afons\\.nuget\\packages\\": {}
+    "C:\\Users\\afons\\Desktop\\api-aggregations\\.dotnet_home\\.nuget\\packages\\": {}
   },
   "project": {
     "version": "1.0.0",
@@ -3216,7 +3216,7 @@
       "projectUniqueName": "C:\\Users\\afons\\Desktop\\api-aggregations\\api-agregations.Tests\\api-agregations.Tests.csproj",
       "projectName": "api-agregations.Tests",
       "projectPath": "C:\\Users\\afons\\Desktop\\api-aggregations\\api-agregations.Tests\\api-agregations.Tests.csproj",
-      "packagesPath": "C:\\Users\\afons\\.nuget\\packages\\",
+      "packagesPath": "C:\\Users\\afons\\Desktop\\api-aggregations\\.dotnet_home\\.nuget\\packages\\",
       "outputPath": "C:\\Users\\afons\\Desktop\\api-aggregations\\api-agregations.Tests\\obj\\",
       "projectStyle": "PackageReference",
       "configFilePaths": [

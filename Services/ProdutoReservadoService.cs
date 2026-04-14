@@ -42,28 +42,31 @@ public class ProdutoReservadoService
             p.descontoAutomatico
         });
 
-        if (ano is not null)
+        var produtosComPartesData = produtosComData.Select(p => new
         {
-            produtosComData = produtosComData.Where(p => p.Data.Year == ano.Value);
-        }
+            Ano = p.Data.Year,
+            Mes = p.Data.Month,
+            Dia = p.Data.Day,
+            p.id_entidade,
+            p.quantidade,
+            p.valor_tarifa,
+            p.valor_comissao,
+            p.valor_taxas,
+            p.desconto,
+            p.descontoAutomatico
+        });
 
-        if (mes is not null)
-        {
-            produtosComData = produtosComData.Where(p => p.Data.Month == mes.Value);
-        }
-
-        if (dia is not null)
-        {
-            produtosComData = produtosComData.Where(p => p.Data.Day == dia.Value);
-        }
+        if (ano is not null) produtosComPartesData = produtosComPartesData.Where(p => p.Ano == ano.Value);
+        if (mes is not null) produtosComPartesData = produtosComPartesData.Where(p => p.Mes == mes.Value);
+        if (dia is not null) produtosComPartesData = produtosComPartesData.Where(p => p.Dia == dia.Value);
 
         if (mes is null)
         {
-            return await produtosComData
-                .GroupBy(p => new { ano = p.Data.Year, p.id_entidade })
+            return await produtosComPartesData
+                .GroupBy(p => new { p.Ano, p.id_entidade })
                 .Select(g => new ProdutoReservadoTotalsDto
                 {
-                    ano = g.Key.ano,
+                    ano = g.Key.Ano,
                     mes = null,
                     dia = null,
                     id_entidade = g.Key.id_entidade,
@@ -80,12 +83,12 @@ public class ProdutoReservadoService
 
         if (dia is null)
         {
-            return await produtosComData
-                .GroupBy(p => new { ano = p.Data.Year, mes = p.Data.Month, p.id_entidade })
+            return await produtosComPartesData
+                .GroupBy(p => new { p.Ano, p.Mes, p.id_entidade })
                 .Select(g => new ProdutoReservadoTotalsDto
                 {
-                    ano = g.Key.ano,
-                    mes = g.Key.mes,
+                    ano = g.Key.Ano,
+                    mes = g.Key.Mes,
                     dia = null,
                     id_entidade = g.Key.id_entidade,
                     quantidade = g.Sum(x => x.quantidade),
@@ -100,13 +103,13 @@ public class ProdutoReservadoService
                 .ToListAsync(cancellationToken);
         }
 
-        return await produtosComData
-            .GroupBy(p => new { ano = p.Data.Year, mes = p.Data.Month, dia = p.Data.Day, p.id_entidade })
+        return await produtosComPartesData
+            .GroupBy(p => new { p.Ano, p.Mes, p.Dia, p.id_entidade })
             .Select(g => new ProdutoReservadoTotalsDto
             {
-                ano = g.Key.ano,
-                mes = g.Key.mes,
-                dia = g.Key.dia,
+                ano = g.Key.Ano,
+                mes = g.Key.Mes,
+                dia = g.Key.Dia,
                 id_entidade = g.Key.id_entidade,
                 quantidade = g.Sum(x => x.quantidade),
                 valor_tarifa = g.Sum(x => x.valor_tarifa),

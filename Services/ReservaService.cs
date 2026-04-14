@@ -35,28 +35,25 @@ public class ReservaService
             r.id_vendedor
         });
 
-        if (ano is not null)
+        var reservasComPartesData = reservasComData.Select(r => new
         {
-            reservasComData = reservasComData.Where(r => r.Data.Year == ano.Value);
-        }
+            Ano = r.Data.Year,
+            Mes = r.Data.Month,
+            Dia = r.Data.Day,
+            r.id_vendedor
+        });
 
-        if (mes is not null)
-        {
-            reservasComData = reservasComData.Where(r => r.Data.Month == mes.Value);
-        }
-
-        if (dia is not null)
-        {
-            reservasComData = reservasComData.Where(r => r.Data.Day == dia.Value);
-        }
+        if (ano is not null) reservasComPartesData = reservasComPartesData.Where(r => r.Ano == ano.Value);
+        if (mes is not null) reservasComPartesData = reservasComPartesData.Where(r => r.Mes == mes.Value);
+        if (dia is not null) reservasComPartesData = reservasComPartesData.Where(r => r.Dia == dia.Value);
 
         if (mes is null)
         {
-            return await reservasComData
-                .GroupBy(r => new { ano = r.Data.Year, r.id_vendedor })
+            return await reservasComPartesData
+                .GroupBy(r => new { r.Ano, r.id_vendedor })
                 .Select(g => new ReservaTotalsDto
                 {
-                    ano = g.Key.ano,
+                    ano = g.Key.Ano,
                     mes = null,
                     dia = null,
                     id_vendedor = g.Key.id_vendedor,
@@ -69,12 +66,12 @@ public class ReservaService
 
         if (dia is null)
         {
-            return await reservasComData
-                .GroupBy(r => new { ano = r.Data.Year, mes = r.Data.Month, r.id_vendedor })
+            return await reservasComPartesData
+                .GroupBy(r => new { r.Ano, r.Mes, r.id_vendedor })
                 .Select(g => new ReservaTotalsDto
                 {
-                    ano = g.Key.ano,
-                    mes = g.Key.mes,
+                    ano = g.Key.Ano,
+                    mes = g.Key.Mes,
                     dia = null,
                     id_vendedor = g.Key.id_vendedor,
                     quantidade = g.Count()
@@ -85,13 +82,13 @@ public class ReservaService
                 .ToListAsync(cancellationToken);
         }
 
-        return await reservasComData
-            .GroupBy(r => new { ano = r.Data.Year, mes = r.Data.Month, dia = r.Data.Day, r.id_vendedor })
+        return await reservasComPartesData
+            .GroupBy(r => new { r.Ano, r.Mes, r.Dia, r.id_vendedor })
             .Select(g => new ReservaTotalsDto
             {
-                ano = g.Key.ano,
-                mes = g.Key.mes,
-                dia = g.Key.dia,
+                ano = g.Key.Ano,
+                mes = g.Key.Mes,
+                dia = g.Key.Dia,
                 id_vendedor = g.Key.id_vendedor,
                 quantidade = g.Count()
             })
