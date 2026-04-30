@@ -21,13 +21,13 @@ public class ProdutoReservadoController : ControllerBase
     /// <summary>
     /// Returns totals of reserved products, grouped by ano/mes/dia and id_entidade.
     /// </summary>
-    /// <param name="ano">Optional year filter (ex: 2026).</param>
-    /// <param name="mes">Optional month filter (1-12). If provided, ano is required.</param>
-    /// <param name="dia">Optional day filter (1-31). If provided, ano and mes are required.</param>
-    /// <param name="id_entidade">Optional "entidade" filter.</param>
-    /// <param name="cancellationToken">Request cancellation token.</param>
+    /// <param name="ano">optional</param>
+    /// <param name="mes">optional</param>
+    /// <param name="dia">optional</param>
+    /// <param name="id_entidade">optional</param>
+    /// <param name="cancellationToken">mandatory</param>
     /// <returns>A list of grouped totals.</returns>
-    [HttpGet("totals")]
+    [HttpGet("totais")]
     [ProducesResponseType(typeof(List<ProdutoReservadoTotalsDto>), StatusCodes.Status200OK)]
     [ProducesResponseType(typeof(ProblemDetails), StatusCodes.Status400BadRequest)]
     [ProducesResponseType(typeof(ProblemDetails), StatusCodes.Status500InternalServerError)]
@@ -45,8 +45,8 @@ public class ProdutoReservadoController : ControllerBase
     /// <summary>
     /// Returns a paginated list of reserved products.
     /// </summary>
-    /// <param name="query">Pagination + optional filters.</param>
-    /// <param name="cancellationToken">Request cancellation token.</param>
+    /// <param name="query">mandatory</param>
+    /// <param name="cancellationToken">mandatory</param>
     /// <returns>A paged result of <see cref="ProdutoReservado"/> items.</returns>
     /// <response code="200">The paged result.</response>
     /// <response code="400">Invalid pagination parameters.</response>
@@ -64,8 +64,8 @@ public class ProdutoReservadoController : ControllerBase
     /// <summary>
     /// Returns a reserved product by id.
     /// </summary>
-    /// <param name="id">Reserved product id.</param>
-    /// <param name="cancellationToken">Request cancellation token.</param>
+    /// <param name="id">mandatory</param>
+    /// <param name="cancellationToken">mandatory</param>
     /// <returns>The <see cref="ProdutoReservado"/>.</returns>
     /// <response code="200">The reserved product.</response>
     /// <response code="404">Not found.</response>
@@ -83,8 +83,8 @@ public class ProdutoReservadoController : ControllerBase
     /// <summary>
     /// Creates a new reserved product.
     /// </summary>
-    /// <param name="produtoReservado">The reserved product to create.</param>
-    /// <param name="cancellationToken">Request cancellation token.</param>
+    /// <param name="produtoReservado">mandatory</param>
+    /// <param name="cancellationToken">mandatory</param>
     /// <returns>The created <see cref="ProdutoReservado"/>.</returns>
     /// <response code="201">Created successfully.</response>
     /// <response code="500">Unexpected error.</response>
@@ -102,9 +102,9 @@ public class ProdutoReservadoController : ControllerBase
     /// <summary>
     /// Updates an existing reserved product.
     /// </summary>
-    /// <param name="id">Reserved product id.</param>
-    /// <param name="produtoReservado">New values.</param>
-    /// <param name="cancellationToken">Request cancellation token.</param>
+    /// <param name="id">mandatory</param>
+    /// <param name="produtoReservado">mandatory</param>
+    /// <param name="cancellationToken">mandatory</param>
     /// <returns>The updated <see cref="ProdutoReservado"/>.</returns>
     /// <response code="200">Updated successfully.</response>
     /// <response code="404">Not found.</response>
@@ -122,8 +122,8 @@ public class ProdutoReservadoController : ControllerBase
     /// <summary>
     /// Deletes a reserved product by id.
     /// </summary>
-    /// <param name="id">Reserved product id.</param>
-    /// <param name="cancellationToken">Request cancellation token.</param>
+    /// <param name="id">mandatory</param>
+    /// <param name="cancellationToken">mandatory</param>
     /// <returns>No content.</returns>
     /// <response code="204">Deleted successfully.</response>
     /// <response code="404">Not found.</response>

@@ -4,6 +4,7 @@ using api_aggregations.Models;
 using api_aggregations.Data;
 using api_aggregations.Dtos;
 using api_aggregations.Exceptions;
+using api_aggregations.Utils;
 using Microsoft.EntityFrameworkCore;
 
 public class ReservaService
@@ -21,116 +22,50 @@ public class ReservaService
     {
         ValidateDateParts(ano, mes, dia);
 
-        IQueryable<Reserva> reservas = _context.Reserva.AsNoTracking();
-
-        if (idVendedor is not null)
-        {
-            reservas = reservas.Where(r => r.id_vendedor == idVendedor.Value);
-        }
-
-        // Prefer "data_pedido" (when it exists). If it's null, fall back to "data_actualizacao" so every row has a date.
-        var reservasComData = reservas.Select(r => new
-        {
-            Data = r.data_pedido ?? r.data_actualizacao,
-            r.id_vendedor
-        });
-
-        var reservasComPartesData = reservasComData.Select(r => new
-        {
-            Ano = r.Data.Year,
-            Mes = r.Data.Month,
-            Dia = r.Data.Day,
-            r.id_vendedor
-        });
-
-        if (ano is not null) reservasComPartesData = reservasComPartesData.Where(r => r.Ano == ano.Value);
-        if (mes is not null) reservasComPartesData = reservasComPartesData.Where(r => r.Mes == mes.Value);
-        if (dia is not null) reservasComPartesData = reservasComPartesData.Where(r => r.Dia == dia.Value);
+        var reservas = await BuildTotalsRowsAsync(idVendedor, cancellationToken);
+        var filteredReservas = FilterTotalsRows(reservas, ano, mes, dia);
 
         if (mes is null)
         {
-            return await reservasComPartesData
-                .GroupBy(r => new { r.Ano, r.id_vendedor })
-                .Select(g => new ReservaTotalsDto
-                {
-                    ano = g.Key.Ano,
-                    mes = null,
-                    dia = null,
-                    id_vendedor = g.Key.id_vendedor,
-                    quantidade = g.Count()
-                })
+            return filteredReservas
+                .GroupBy(r => new ReservaYearKey(r.Ano, r.id_vendedor))
+                .Select(CreateYearTotals)
                 .OrderBy(x => x.ano)
                 .ThenBy(x => x.id_vendedor)
-                .ToListAsync(cancellationToken);
+                .ToList();
         }
 
         if (dia is null)
         {
-            return await reservasComPartesData
-                .GroupBy(r => new { r.Ano, r.Mes, r.id_vendedor })
-                .Select(g => new ReservaTotalsDto
-                {
-                    ano = g.Key.Ano,
-                    mes = g.Key.Mes,
-                    dia = null,
-                    id_vendedor = g.Key.id_vendedor,
-                    quantidade = g.Count()
-                })
+            return filteredReservas
+                .GroupBy(r => new ReservaMonthKey(r.Ano, r.Mes, r.id_vendedor))
+                .Select(CreateMonthTotals)
                 .OrderBy(x => x.ano)
                 .ThenBy(x => x.mes)
                 .ThenBy(x => x.id_vendedor)
-                .ToListAsync(cancellationToken);
+                .ToList();
         }
 
-        return await reservasComPartesData
-            .GroupBy(r => new { r.Ano, r.Mes, r.Dia, r.id_vendedor })
-            .Select(g => new ReservaTotalsDto
-            {
-                ano = g.Key.Ano,
-                mes = g.Key.Mes,
-                dia = g.Key.Dia,
-                id_vendedor = g.Key.id_vendedor,
-                quantidade = g.Count()
-            })
+        return filteredReservas
+            .GroupBy(r => new ReservaDayKey(r.Ano, r.Mes, r.Dia, r.id_vendedor))
+            .Select(CreateDayTotals)
             .OrderBy(x => x.ano)
             .ThenBy(x => x.mes)
             .ThenBy(x => x.dia)
             .ThenBy(x => x.id_vendedor)
-            .ToListAsync(cancellationToken);
+            .ToList();
     }
 
     public async Task<PagedResult<Reserva>> GetAllAsync(ReservaQuery query, CancellationToken cancellationToken)
     {
         ValidatePagination(query);
 
-        IQueryable<Reserva> reservas = _context.Reserva.AsNoTracking();
-
-        if (!string.IsNullOrWhiteSpace(query.numero))
-        {
-            reservas = reservas.Where(r => r.numero != null && r.numero.Contains(query.numero));
-        }
-
-        if (query.tipo is not null)
-        {
-            reservas = reservas.Where(r => r.tipo == query.tipo.Value);
-        }
-
-        if (query.estado is not null)
-        {
-            reservas = reservas.Where(r => r.estado == query.estado.Value);
-        }
-
-        if (!string.IsNullOrWhiteSpace(query.id_externo))
-        {
-            reservas = reservas.Where(r => r.id_externo.Contains(query.id_externo));
-        }
+        var reservas = ApplyListFilters(query);
 
         var totalCount = await reservas.CountAsync(cancellationToken);
-
-        var skip = (query.PageNumber - 1) * query.PageSize;
         var items = await reservas
             .OrderBy(r => r.id)
-            .Skip(skip)
+            .Skip((query.PageNumber - 1) * query.PageSize)
             .Take(query.PageSize)
             .ToListAsync(cancellationToken);
 
@@ -201,6 +136,129 @@ public class ReservaService
         _logger.LogInformation("Deleted Reserva with id {Id}", id);
     }
 
+    private IQueryable<Reserva> ApplyListFilters(ReservaQuery query)
+    {
+        var reservas = _context.Reserva.AsNoTracking().AsQueryable();
+
+        if (!string.IsNullOrWhiteSpace(query.numero))
+        {
+            reservas = reservas.Where(r => r.numero != null && r.numero.Contains(query.numero));
+        }
+
+        if (query.tipo is not null)
+        {
+            reservas = reservas.Where(r => r.tipo == query.tipo.Value);
+        }
+
+        if (query.estado is not null)
+        {
+            reservas = reservas.Where(r => r.estado == query.estado.Value);
+        }
+
+        if (!string.IsNullOrWhiteSpace(query.id_externo))
+        {
+            reservas = reservas.Where(r => r.id_externo.Contains(query.id_externo));
+        }
+
+        return reservas;
+    }
+
+    private async Task<List<ReservaTotalRow>> BuildTotalsRowsAsync(int? idVendedor, CancellationToken cancellationToken)
+    {
+        var reservas = _context.Reserva.AsNoTracking().AsQueryable();
+
+        if (idVendedor is not null)
+        {
+            reservas = reservas.Where(r => r.id_vendedor == idVendedor.Value);
+        }
+
+        var rows = await reservas
+            .Select(r => new
+            {
+                r.data_pedido,
+                r.data_actualizacao,
+                r.id_vendedor
+            })
+            .ToListAsync(cancellationToken);
+
+        return rows.Select(r =>
+        {
+            var data = GetReservaDate(r.data_pedido, r.data_actualizacao);
+
+            return new ReservaTotalRow
+            {
+                Ano = data.Year,
+                Mes = data.Month,
+                Dia = data.Day,
+                id_vendedor = r.id_vendedor
+            };
+        }).ToList();
+    }
+
+    private static List<ReservaTotalRow> FilterTotalsRows(List<ReservaTotalRow> rows, int? ano, int? mes, int? dia)
+    {
+        var filteredRows = rows;
+
+        if (ano is not null)
+        {
+            filteredRows = filteredRows.Where(r => r.Ano == ano.Value).ToList();
+        }
+
+        if (mes is not null)
+        {
+            filteredRows = filteredRows.Where(r => r.Mes == mes.Value).ToList();
+        }
+
+        if (dia is not null)
+        {
+            filteredRows = filteredRows.Where(r => r.Dia == dia.Value).ToList();
+        }
+
+        return filteredRows;
+    }
+
+    private static DateTime GetReservaDate(string? dataPedido, string dataActualizacao)
+    {
+        return DateStringHelper.ParseDateOrNull(dataPedido)
+            ?? DateStringHelper.ParseDate(dataActualizacao);
+    }
+
+    private static ReservaTotalsDto CreateYearTotals(IGrouping<ReservaYearKey, ReservaTotalRow> group)
+    {
+        return new ReservaTotalsDto
+        {
+            ano = group.Key.Ano,
+            mes = null,
+            dia = null,
+            id_vendedor = group.Key.id_vendedor,
+            quantidade = group.Count()
+        };
+    }
+
+    private static ReservaTotalsDto CreateMonthTotals(IGrouping<ReservaMonthKey, ReservaTotalRow> group)
+    {
+        return new ReservaTotalsDto
+        {
+            ano = group.Key.Ano,
+            mes = group.Key.Mes,
+            dia = null,
+            id_vendedor = group.Key.id_vendedor,
+            quantidade = group.Count()
+        };
+    }
+
+    private static ReservaTotalsDto CreateDayTotals(IGrouping<ReservaDayKey, ReservaTotalRow> group)
+    {
+        return new ReservaTotalsDto
+        {
+            ano = group.Key.Ano,
+            mes = group.Key.Mes,
+            dia = group.Key.Dia,
+            id_vendedor = group.Key.id_vendedor,
+            quantidade = group.Count()
+        };
+    }
+
     private static void ValidatePagination(PaginationQuery query)
     {
         if (query.PageNumber < 1)
@@ -223,27 +281,27 @@ public class ReservaService
     {
         if (ano is not null && ano < 1)
         {
-            throw new BadRequestException("ano must be a valid year.");
+            throw new BadRequestException("Parameter 'ano' must be a valid year.");
         }
 
         if (mes is not null && (mes < 1 || mes > 12))
         {
-            throw new BadRequestException("mes must be between 1 and 12.");
+            throw new BadRequestException("Parameter 'mes' must be between 1 and 12.");
         }
 
         if (dia is not null && (dia < 1 || dia > 31))
         {
-            throw new BadRequestException("dia must be between 1 and 31.");
+            throw new BadRequestException("Parameter 'dia' must be between 1 and 31.");
         }
 
         if (mes is not null && ano is null)
         {
-            throw new BadRequestException("When using mes, you must also provide ano.");
+            throw new BadRequestException("When using 'mes', you must also provide 'ano'.");
         }
 
         if (dia is not null && (ano is null || mes is null))
         {
-            throw new BadRequestException("When using dia, you must also provide ano and mes.");
+            throw new BadRequestException("When using 'dia', you must also provide 'ano' and 'mes'.");
         }
 
         if (ano is not null && mes is not null && dia is not null)
@@ -251,8 +309,20 @@ public class ReservaService
             var maxDay = DateTime.DaysInMonth(ano.Value, mes.Value);
             if (dia.Value > maxDay)
             {
-                throw new BadRequestException($"dia must be between 1 and {maxDay} for ano={ano} and mes={mes}.");
+                throw new BadRequestException($"Parameter 'dia' must be between 1 and {maxDay} for ano={ano} and mes={mes}.");
             }
         }
     }
+
+    private sealed class ReservaTotalRow
+    {
+        public int Ano { get; init; }
+        public int Mes { get; init; }
+        public int Dia { get; init; }
+        public int id_vendedor { get; init; }
+    }
+
+    private sealed record ReservaYearKey(int Ano, int id_vendedor);
+    private sealed record ReservaMonthKey(int Ano, int Mes, int id_vendedor);
+    private sealed record ReservaDayKey(int Ano, int Mes, int Dia, int id_vendedor);
 }

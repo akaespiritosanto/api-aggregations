@@ -4,6 +4,7 @@ using api_aggregations.Models;
 using api_aggregations.Data;
 using api_aggregations.Dtos;
 using api_aggregations.Exceptions;
+using api_aggregations.Utils;
 using Microsoft.EntityFrameworkCore;
 
 public class ProdutoReservadoService
@@ -16,151 +17,54 @@ public class ProdutoReservadoService
         _context = context;
         _logger = logger;
     }
-    
-    // ############################################################################################################
-
     public async Task<List<ProdutoReservadoTotalsDto>> GetTotalsAsync(int? ano, int? mes, int? dia, int? idEntidade, CancellationToken cancellationToken)
     {
         ValidateDateParts(ano, mes, dia);
 
-        IQueryable<ProdutoReservado> produtos = _context.ProdutoReservado.AsNoTracking();
-
-        if (idEntidade is not null)
-        {
-            produtos = produtos.Where(p => p.id_entidade == idEntidade.Value);
-        }
-
-        var produtosComData = produtos.Select(p => new
-        {
-            Data = p.data_criacao,
-            p.id_entidade,
-            p.quantidade,
-            p.valor_tarifa,
-            p.valor_comissao,
-            p.valor_taxas,
-            p.desconto,
-            p.descontoAutomatico
-        });
-
-        var produtosComPartesData = produtosComData.Select(p => new
-        {
-            Ano = p.Data.Year,
-            Mes = p.Data.Month,
-            Dia = p.Data.Day,
-            p.id_entidade,
-            p.quantidade,
-            p.valor_tarifa,
-            p.valor_comissao,
-            p.valor_taxas,
-            p.desconto,
-            p.descontoAutomatico
-        });
-
-        if (ano is not null) produtosComPartesData = produtosComPartesData.Where(p => p.Ano == ano.Value);
-        if (mes is not null) produtosComPartesData = produtosComPartesData.Where(p => p.Mes == mes.Value);
-        if (dia is not null) produtosComPartesData = produtosComPartesData.Where(p => p.Dia == dia.Value);
+        var produtos = await BuildTotalsRowsAsync(idEntidade, cancellationToken);
+        var filteredProdutos = FilterTotalsRows(produtos, ano, mes, dia);
 
         if (mes is null)
         {
-            return await produtosComPartesData
-                .GroupBy(p => new { p.Ano, p.id_entidade })
-                .Select(g => new ProdutoReservadoTotalsDto
-                {
-                    ano = g.Key.Ano,
-                    mes = null,
-                    dia = null,
-                    id_entidade = g.Key.id_entidade,
-                    quantidade = g.Sum(x => x.quantidade),
-                    valor_tarifa = g.Sum(x => x.valor_tarifa),
-                    valor_comissao = g.Sum(x => x.valor_comissao),
-                    valor_taxas = g.Sum(x => x.valor_taxas),
-                    valor_descontos = g.Sum(x => (x.desconto ?? 0) + x.descontoAutomatico)
-                })
+            return filteredProdutos
+                .GroupBy(p => new ProdutoYearKey(p.Ano, p.id_entidade))
+                .Select(CreateYearTotals)
                 .OrderBy(x => x.ano)
                 .ThenBy(x => x.id_entidade)
-                .ToListAsync(cancellationToken);
+                .ToList();
         }
 
         if (dia is null)
         {
-            return await produtosComPartesData
-                .GroupBy(p => new { p.Ano, p.Mes, p.id_entidade })
-                .Select(g => new ProdutoReservadoTotalsDto
-                {
-                    ano = g.Key.Ano,
-                    mes = g.Key.Mes,
-                    dia = null,
-                    id_entidade = g.Key.id_entidade,
-                    quantidade = g.Sum(x => x.quantidade),
-                    valor_tarifa = g.Sum(x => x.valor_tarifa),
-                    valor_comissao = g.Sum(x => x.valor_comissao),
-                    valor_taxas = g.Sum(x => x.valor_taxas),
-                    valor_descontos = g.Sum(x => (x.desconto ?? 0) + x.descontoAutomatico)
-                })
+            return filteredProdutos
+                .GroupBy(p => new ProdutoMonthKey(p.Ano, p.Mes, p.id_entidade))
+                .Select(CreateMonthTotals)
                 .OrderBy(x => x.ano)
                 .ThenBy(x => x.mes)
                 .ThenBy(x => x.id_entidade)
-                .ToListAsync(cancellationToken);
+                .ToList();
         }
 
-        return await produtosComPartesData
-            .GroupBy(p => new { p.Ano, p.Mes, p.Dia, p.id_entidade })
-            .Select(g => new ProdutoReservadoTotalsDto
-            {
-                ano = g.Key.Ano,
-                mes = g.Key.Mes,
-                dia = g.Key.Dia,
-                id_entidade = g.Key.id_entidade,
-                quantidade = g.Sum(x => x.quantidade),
-                valor_tarifa = g.Sum(x => x.valor_tarifa),
-                valor_comissao = g.Sum(x => x.valor_comissao),
-                valor_taxas = g.Sum(x => x.valor_taxas),
-                valor_descontos = g.Sum(x => (x.desconto ?? 0) + x.descontoAutomatico)
-            })
+        return filteredProdutos
+            .GroupBy(p => new ProdutoDayKey(p.Ano, p.Mes, p.Dia, p.id_entidade))
+            .Select(CreateDayTotals)
             .OrderBy(x => x.ano)
             .ThenBy(x => x.mes)
             .ThenBy(x => x.dia)
             .ThenBy(x => x.id_entidade)
-            .ToListAsync(cancellationToken);
+            .ToList();
     }
 
     public async Task<PagedResult<ProdutoReservado>> GetAllAsync(ProdutoReservadoQuery query, CancellationToken cancellationToken)
     {
         ValidatePagination(query);
 
-        IQueryable<ProdutoReservado> produtos = _context.ProdutoReservado.AsNoTracking();
-
-        if (query.id_reserva is not null)
-        {
-            produtos = produtos.Where(p => p.id_reserva == query.id_reserva.Value);
-        }
-
-        if (query.id_produto is not null)
-        {
-            produtos = produtos.Where(p => p.id_produto == query.id_produto.Value);
-        }
-
-        if (query.estado is not null)
-        {
-            produtos = produtos.Where(p => p.estado == query.estado.Value);
-        }
-
-        if (!string.IsNullOrWhiteSpace(query.referencia))
-        {
-            produtos = produtos.Where(p => p.referencia != null && p.referencia.Contains(query.referencia));
-        }
-
-        if (query.agregado is not null)
-        {
-            produtos = produtos.Where(p => p.agregado == query.agregado.Value);
-        }
+        var produtos = ApplyListFilters(query);
 
         var totalCount = await produtos.CountAsync(cancellationToken);
-
-        var skip = (query.PageNumber - 1) * query.PageSize;
         var items = await produtos
             .OrderBy(p => p.id)
-            .Skip(skip)
+            .Skip((query.PageNumber - 1) * query.PageSize)
             .Take(query.PageSize)
             .ToListAsync(cancellationToken);
 
@@ -217,16 +121,156 @@ public class ProdutoReservadoService
 
     public async Task DeleteAsync(int id, CancellationToken cancellationToken)
     {
-        var deleted = await _context.ProdutoReservado
-            .Where(p => p.id == id)
-            .ExecuteDeleteAsync(cancellationToken);
+        var existing = await _context.ProdutoReservado
+            .FirstOrDefaultAsync(p => p.id == id, cancellationToken);
 
-        if (deleted == 0)
+        if (existing is null)
         {
             throw new NotFoundException($"ProdutoReservado with id '{id}' was not found.");
         }
 
+        _context.ProdutoReservado.Remove(existing);
+        await _context.SaveChangesAsync(cancellationToken);
+
         _logger.LogInformation("Deleted ProdutoReservado with id {Id}", id);
+    }
+
+    private IQueryable<ProdutoReservado> ApplyListFilters(ProdutoReservadoQuery query)
+    {
+        var produtos = _context.ProdutoReservado.AsNoTracking().AsQueryable();
+
+        if (query.id_reserva is not null)
+        {
+            produtos = produtos.Where(p => p.id_reserva == query.id_reserva.Value);
+        }
+
+        if (query.id_produto is not null)
+        {
+            produtos = produtos.Where(p => p.id_produto == query.id_produto.Value);
+        }
+
+        if (query.estado is not null)
+        {
+            produtos = produtos.Where(p => p.estado == query.estado.Value);
+        }
+
+        if (!string.IsNullOrWhiteSpace(query.referencia))
+        {
+            produtos = produtos.Where(p => p.referencia != null && p.referencia.Contains(query.referencia));
+        }
+
+        if (query.agregado is not null)
+        {
+            produtos = produtos.Where(p => p.agregado == query.agregado.Value);
+        }
+
+        return produtos;
+    }
+
+    private async Task<List<ProdutoReservadoTotalRow>> BuildTotalsRowsAsync(int? idEntidade, CancellationToken cancellationToken)
+    {
+        var produtos = _context.ProdutoReservado.AsNoTracking().AsQueryable();
+
+        if (idEntidade is not null)
+        {
+            produtos = produtos.Where(p => p.id_entidade == idEntidade.Value);
+        }
+
+        var rows = await produtos
+            .Select(p => new
+            {
+                p.data_criacao,
+                p.id_entidade,
+                p.quantidade,
+                p.valor_tarifa,
+                p.valor_comissao,
+                p.valor_taxas,
+                p.desconto,
+                p.descontoAutomatico
+            })
+            .ToListAsync(cancellationToken);
+
+        return rows.Select(p =>
+        {
+            var dataCriacao = GetCreationDate(p.data_criacao);
+
+            return new ProdutoReservadoTotalRow
+            {
+                Ano = dataCriacao.Year,
+                Mes = dataCriacao.Month,
+                Dia = dataCriacao.Day,
+                id_entidade = p.id_entidade,
+                quantidade = p.quantidade,
+                valor_tarifa = p.valor_tarifa,
+                valor_comissao = p.valor_comissao,
+                valor_taxas = p.valor_taxas,
+                desconto = p.desconto,
+                descontoAutomatico = p.descontoAutomatico
+            };
+        }).ToList();
+    }
+
+    private static List<ProdutoReservadoTotalRow> FilterTotalsRows(List<ProdutoReservadoTotalRow> rows, int? ano, int? mes, int? dia)
+    {
+        var filteredRows = rows;
+
+        if (ano is not null)
+        {
+            filteredRows = filteredRows.Where(p => p.Ano == ano.Value).ToList();
+        }
+
+        if (mes is not null)
+        {
+            filteredRows = filteredRows.Where(p => p.Mes == mes.Value).ToList();
+        }
+
+        if (dia is not null)
+        {
+            filteredRows = filteredRows.Where(p => p.Dia == dia.Value).ToList();
+        }
+
+        return filteredRows;
+    }
+
+    private static DateTime GetCreationDate(string dataCriacao)
+    {
+        return DateStringHelper.ParseDate(dataCriacao);
+    }
+
+    private static ProdutoReservadoTotalsDto CreateYearTotals(IGrouping<ProdutoYearKey, ProdutoReservadoTotalRow> group)
+    {
+        return CreateTotals(group, group.Key.Ano, null, null, group.Key.id_entidade);
+    }
+
+    private static ProdutoReservadoTotalsDto CreateMonthTotals(IGrouping<ProdutoMonthKey, ProdutoReservadoTotalRow> group)
+    {
+        return CreateTotals(group, group.Key.Ano, group.Key.Mes, null, group.Key.id_entidade);
+    }
+
+    private static ProdutoReservadoTotalsDto CreateDayTotals(IGrouping<ProdutoDayKey, ProdutoReservadoTotalRow> group)
+    {
+        return CreateTotals(group, group.Key.Ano, group.Key.Mes, group.Key.Dia, group.Key.id_entidade);
+    }
+
+    private static ProdutoReservadoTotalsDto CreateTotals(
+        IEnumerable<ProdutoReservadoTotalRow> group,
+        int ano,
+        int? mes,
+        int? dia,
+        int? idEntidade)
+    {
+        return new ProdutoReservadoTotalsDto
+        {
+            ano = ano,
+            mes = mes,
+            dia = dia,
+            id_entidade = idEntidade,
+            quantidade = group.Sum(x => x.quantidade),
+            valor_tarifa = group.Sum(x => x.valor_tarifa),
+            valor_comissao = group.Sum(x => x.valor_comissao),
+            valor_taxas = group.Sum(x => x.valor_taxas),
+            valor_descontos = group.Sum(x => (x.desconto ?? 0) + x.descontoAutomatico)
+        };
     }
 
     private static void ValidatePagination(PaginationQuery query)
@@ -251,27 +295,27 @@ public class ProdutoReservadoService
     {
         if (ano is not null && ano < 1)
         {
-            throw new BadRequestException("ano must be a valid year.");
+            throw new BadRequestException("Parameter 'ano' must be a valid year.");
         }
 
         if (mes is not null && (mes < 1 || mes > 12))
         {
-            throw new BadRequestException("mes must be between 1 and 12.");
+            throw new BadRequestException("Parameter 'mes' must be between 1 and 12.");
         }
 
         if (dia is not null && (dia < 1 || dia > 31))
         {
-            throw new BadRequestException("dia must be between 1 and 31.");
+            throw new BadRequestException("Parameter 'dia' must be between 1 and 31.");
         }
 
         if (mes is not null && ano is null)
         {
-            throw new BadRequestException("When using mes, you must also provide ano.");
+            throw new BadRequestException("When using 'mes', you must also provide 'ano'.");
         }
 
         if (dia is not null && (ano is null || mes is null))
         {
-            throw new BadRequestException("When using dia, you must also provide ano and mes.");
+            throw new BadRequestException("When using 'dia', you must also provide 'ano' and 'mes'.");
         }
 
         if (ano is not null && mes is not null && dia is not null)
@@ -279,8 +323,26 @@ public class ProdutoReservadoService
             var maxDay = DateTime.DaysInMonth(ano.Value, mes.Value);
             if (dia.Value > maxDay)
             {
-                throw new BadRequestException($"dia must be between 1 and {maxDay} for ano={ano} and mes={mes}.");
+                throw new BadRequestException($"Parameter 'dia' must be between 1 and {maxDay} for ano={ano} and mes={mes}.");
             }
         }
     }
+
+    private sealed class ProdutoReservadoTotalRow
+    {
+        public int Ano { get; init; }
+        public int Mes { get; init; }
+        public int Dia { get; init; }
+        public int? id_entidade { get; init; }
+        public int quantidade { get; init; }
+        public double valor_tarifa { get; init; }
+        public double valor_comissao { get; init; }
+        public double valor_taxas { get; init; }
+        public double? desconto { get; init; }
+        public double descontoAutomatico { get; init; }
+    }
+
+    private sealed record ProdutoYearKey(int Ano, int? id_entidade);
+    private sealed record ProdutoMonthKey(int Ano, int Mes, int? id_entidade);
+    private sealed record ProdutoDayKey(int Ano, int Mes, int Dia, int? id_entidade);
 }

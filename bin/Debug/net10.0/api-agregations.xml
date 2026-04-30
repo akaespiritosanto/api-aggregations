@@ -8,19 +8,19 @@
             <summary>
             Returns totals of reserved products, grouped by ano/mes/dia and id_entidade.
             </summary>
-            <param name="ano">Optional year filter (ex: 2026).</param>
-            <param name="mes">Optional month filter (1-12). If provided, ano is required.</param>
-            <param name="dia">Optional day filter (1-31). If provided, ano and mes are required.</param>
-            <param name="id_entidade">Optional "entidade" filter.</param>
-            <param name="cancellationToken">Request cancellation token.</param>
+            <param name="ano">optional</param>
+            <param name="mes">optional</param>
+            <param name="dia">optional</param>
+            <param name="id_entidade">optional</param>
+            <param name="cancellationToken">mandatory</param>
             <returns>A list of grouped totals.</returns>
         </member>
         <member name="M:api_aggregations.Controllers.ProdutoReservadoController.GetAll(api_aggregations.Dtos.ProdutoReservadoQuery,System.Threading.CancellationToken)">
             <summary>
             Returns a paginated list of reserved products.
             </summary>
-            <param name="query">Pagination + optional filters.</param>
-            <param name="cancellationToken">Request cancellation token.</param>
+            <param name="query">mandatory</param>
+            <param name="cancellationToken">mandatory</param>
             <returns>A paged result of <see cref="T:api_aggregations.Models.ProdutoReservado"/> items.</returns>
             <response code="200">The paged result.</response>
             <response code="400">Invalid pagination parameters.</response>
@@ -30,8 +30,8 @@
             <summary>
             Returns a reserved product by id.
             </summary>
-            <param name="id">Reserved product id.</param>
-            <param name="cancellationToken">Request cancellation token.</param>
+            <param name="id">mandatory</param>
+            <param name="cancellationToken">mandatory</param>
             <returns>The <see cref="T:api_aggregations.Models.ProdutoReservado"/>.</returns>
             <response code="200">The reserved product.</response>
             <response code="404">Not found.</response>
@@ -41,8 +41,8 @@
             <summary>
             Creates a new reserved product.
             </summary>
-            <param name="produtoReservado">The reserved product to create.</param>
-            <param name="cancellationToken">Request cancellation token.</param>
+            <param name="produtoReservado">mandatory</param>
+            <param name="cancellationToken">mandatory</param>
             <returns>The created <see cref="T:api_aggregations.Models.ProdutoReservado"/>.</returns>
             <response code="201">Created successfully.</response>
             <response code="500">Unexpected error.</response>
@@ -51,9 +51,9 @@
             <summary>
             Updates an existing reserved product.
             </summary>
-            <param name="id">Reserved product id.</param>
-            <param name="produtoReservado">New values.</param>
-            <param name="cancellationToken">Request cancellation token.</param>
+            <param name="id">mandatory</param>
+            <param name="produtoReservado">mandatory</param>
+            <param name="cancellationToken">mandatory</param>
             <returns>The updated <see cref="T:api_aggregations.Models.ProdutoReservado"/>.</returns>
             <response code="200">Updated successfully.</response>
             <response code="404">Not found.</response>
@@ -63,30 +63,54 @@
             <summary>
             Deletes a reserved product by id.
             </summary>
-            <param name="id">Reserved product id.</param>
-            <param name="cancellationToken">Request cancellation token.</param>
+            <param name="id">mandatory</param>
+            <param name="cancellationToken">mandatory</param>
             <returns>No content.</returns>
             <response code="204">Deleted successfully.</response>
             <response code="404">Not found.</response>
             <response code="500">Unexpected error.</response>
         </member>
+        <member name="M:api_aggregations.Controllers.RelatorioValoresEDuracaoReservasController.GetTotaisProduto(api_aggregations.Dtos.TotaisQuery,System.Threading.CancellationToken)">
+            <summary>
+            Returns totals grouped by month and place.
+            </summary>
+            <param name="query">mandatory</param>
+            <param name="cancellationToken">mandatory</param>
+            <returns>Totals grouped by month and by place.</returns>
+        </member>
+        <member name="M:api_aggregations.Controllers.RelatorioValoresEDuracaoReservasController.GetTotaisLugar(api_aggregations.Dtos.TotaisQuery,System.Threading.CancellationToken)">
+            <summary>
+            Returns totals grouped by month and place.
+            </summary>
+            <param name="query">mandatory</param>
+            <param name="cancellationToken">mandatory</param>
+            <returns>Totals grouped by month and by place.</returns>
+        </member>
+        <member name="M:api_aggregations.Controllers.RelatorioValoresEDuracaoReservasController.ListDisponibilidadesBase(api_aggregations.Dtos.ListDisponibilidadesBaseQuery,System.Threading.CancellationToken)">
+            <summary>
+            Returns the available DispBase rows for a service.
+            </summary>
+            <param name="query">mandatory</param>
+            <param name="cancellationToken">mandatory</param>
+            <returns>A list of DispBase items.</returns>
+        </member>
         <member name="M:api_aggregations.Controllers.ReservaController.GetTotals(System.Nullable{System.Int32},System.Nullable{System.Int32},System.Nullable{System.Int32},System.Nullable{System.Int32},System.Threading.CancellationToken)">
             <summary>
             Returns totals of reservas, grouped by ano/mes/dia and id_vendedor.
             </summary>
-            <param name="ano">Optional year filter (ex: 2026).</param>
-            <param name="mes">Optional month filter (1-12). If provided, ano is required.</param>
-            <param name="dia">Optional day filter (1-31). If provided, ano and mes are required.</param>
-            <param name="id_vendedor">Optional seller filter.</param>
-            <param name="cancellationToken">Request cancellation token.</param>
+            <param name="ano">optional</param>
+            <param name="mes">optional</param>
+            <param name="dia">optional</param>
+            <param name="id_vendedor">optional</param>
+            <param name="cancellationToken">mandatory</param>
             <returns>A list of grouped totals.</returns>
         </member>
         <member name="M:api_aggregations.Controllers.ReservaController.GetAll(api_aggregations.Dtos.ReservaQuery,System.Threading.CancellationToken)">
             <summary>
             Returns a paginated list of reservas.
             </summary>
-            <param name="query">Pagination + optional filters.</param>
-            <param name="cancellationToken">Request cancellation token.</param>
+            <param name="query">mandatory</param>
+            <param name="cancellationToken">mandatory</param>
             <returns>A paged result of <see cref="T:api_aggregations.Models.Reserva"/> items.</returns>
             <response code="200">The paged result.</response>
             <response code="400">Invalid pagination parameters.</response>
@@ -96,8 +120,8 @@
             <summary>
             Returns a reserva by id.
             </summary>
-            <param name="id">Reserva id.</param>
-            <param name="cancellationToken">Request cancellation token.</param>
+            <param name="id">mandatory</param>
+            <param name="cancellationToken">mandatory</param>
             <returns>The <see cref="T:api_aggregations.Models.Reserva"/>.</returns>
             <response code="200">The reserva.</response>
             <response code="404">Not found.</response>
@@ -107,8 +131,8 @@
             <summary>
             Creates a new reserva.
             </summary>
-            <param name="reserva">The reserva to create.</param>
-            <param name="cancellationToken">Request cancellation token.</param>
+            <param name="reserva">mandatory</param>
+            <param name="cancellationToken">mandatory</param>
             <returns>The created <see cref="T:api_aggregations.Models.Reserva"/>.</returns>
             <response code="201">Created successfully.</response>
             <response code="500">Unexpected error.</response>
@@ -117,9 +141,9 @@
             <summary>
             Updates an existing reserva.
             </summary>
-            <param name="id">Reserva id.</param>
-            <param name="reserva">New values.</param>
-            <param name="cancellationToken">Request cancellation token.</param>
+            <param name="id">mandatory</param>
+            <param name="reserva">mandatory</param>
+            <param name="cancellationToken">mandatory</param>
             <returns>The updated <see cref="T:api_aggregations.Models.Reserva"/>.</returns>
             <response code="200">Updated successfully.</response>
             <response code="404">Not found.</response>
@@ -129,12 +153,279 @@
             <summary>
             Deletes a reserva by id.
             </summary>
-            <param name="id">Reserva id.</param>
-            <param name="cancellationToken">Request cancellation token.</param>
+            <param name="id">mandatory</param>
+            <param name="cancellationToken">mandatory</param>
             <returns>No content.</returns>
             <response code="204">Deleted successfully.</response>
             <response code="404">Not found.</response>
             <response code="500">Unexpected error.</response>
+        </member>
+        <member name="P:api_aggregations.Dtos.ListDisponibilidadesBaseQuery.idServico">
+            <summary>mandatory</summary>
+        </member>
+        <member name="P:api_aggregations.Dtos.PaginationQuery.PageNumber">
+            <summary>optional</summary>
+        </member>
+        <member name="P:api_aggregations.Dtos.PaginationQuery.PageSize">
+            <summary>optional</summary>
+        </member>
+        <member name="P:api_aggregations.Dtos.ProdutoReservadoQuery.id_reserva">
+            <summary>optional</summary>
+        </member>
+        <member name="P:api_aggregations.Dtos.ProdutoReservadoQuery.id_produto">
+            <summary>optional</summary>
+        </member>
+        <member name="P:api_aggregations.Dtos.ProdutoReservadoQuery.estado">
+            <summary>optional</summary>
+        </member>
+        <member name="P:api_aggregations.Dtos.ProdutoReservadoQuery.referencia">
+            <summary>optional</summary>
+        </member>
+        <member name="P:api_aggregations.Dtos.ProdutoReservadoQuery.agregado">
+            <summary>optional</summary>
+        </member>
+        <member name="P:api_aggregations.Dtos.ReservaQuery.numero">
+            <summary>optional</summary>
+        </member>
+        <member name="P:api_aggregations.Dtos.ReservaQuery.tipo">
+            <summary>optional</summary>
+        </member>
+        <member name="P:api_aggregations.Dtos.ReservaQuery.estado">
+            <summary>optional</summary>
+        </member>
+        <member name="P:api_aggregations.Dtos.ReservaQuery.id_externo">
+            <summary>optional</summary>
+        </member>
+        <member name="P:api_aggregations.Dtos.TotaisQuery.idServico">
+            <summary>optional</summary>
+        </member>
+        <member name="P:api_aggregations.Dtos.TotaisQuery.dataInicio">
+            <summary>optional</summary>
+        </member>
+        <member name="P:api_aggregations.Dtos.TotaisQuery.dataFim">
+            <summary>optional</summary>
+        </member>
+        <member name="P:api_aggregations.Dtos.TotaisQuery.idDispBase">
+            <summary>optional</summary>
+        </member>
+        <member name="P:api_aggregations.Models.ProdutoReservado.id">
+            <summary>mandatory</summary>
+        </member>
+        <member name="P:api_aggregations.Models.ProdutoReservado.DataInicio">
+            <summary>optional</summary>
+        </member>
+        <member name="P:api_aggregations.Models.ProdutoReservado.DataFim">
+            <summary>optional</summary>
+        </member>
+        <member name="P:api_aggregations.Models.ProdutoReservado.id_reserva">
+            <summary>mandatory</summary>
+        </member>
+        <member name="P:api_aggregations.Models.ProdutoReservado.estado">
+            <summary>optional</summary>
+        </member>
+        <member name="P:api_aggregations.Models.ProdutoReservado.id_tarifa">
+            <summary>mandatory</summary>
+        </member>
+        <member name="P:api_aggregations.Models.ProdutoReservado.id_produto">
+            <summary>mandatory</summary>
+        </member>
+        <member name="P:api_aggregations.Models.ProdutoReservado.referencia">
+            <summary>optional</summary>
+        </member>
+        <member name="P:api_aggregations.Models.ProdutoReservado.numero">
+            <summary>optional</summary>
+        </member>
+        <member name="P:api_aggregations.Models.ProdutoReservado.agregado">
+            <summary>optional</summary>
+        </member>
+        <member name="P:api_aggregations.Models.ProdutoReservado.id_produto_reservado">
+            <summary>optional</summary>
+        </member>
+        <member name="P:api_aggregations.Models.ProdutoReservado.hora_inicio">
+            <summary>optional</summary>
+        </member>
+        <member name="P:api_aggregations.Models.ProdutoReservado.hora_fim">
+            <summary>optional</summary>
+        </member>
+        <member name="P:api_aggregations.Models.ProdutoReservado.id_entidade">
+            <summary>optional</summary>
+        </member>
+        <member name="P:api_aggregations.Models.ProdutoReservado.n_pessoas">
+            <summary>optional</summary>
+        </member>
+        <member name="P:api_aggregations.Models.ProdutoReservado.quantidade">
+            <summary>mandatory</summary>
+        </member>
+        <member name="P:api_aggregations.Models.ProdutoReservado.desconto">
+            <summary>optional</summary>
+        </member>
+        <member name="P:api_aggregations.Models.ProdutoReservado.valor_tarifa">
+            <summary>mandatory</summary>
+        </member>
+        <member name="P:api_aggregations.Models.ProdutoReservado.valor_comissao">
+            <summary>mandatory</summary>
+        </member>
+        <member name="P:api_aggregations.Models.ProdutoReservado.valor_taxas">
+            <summary>mandatory</summary>
+        </member>
+        <member name="P:api_aggregations.Models.ProdutoReservado.ref_taxas">
+            <summary>mandatory</summary>
+        </member>
+        <member name="P:api_aggregations.Models.ProdutoReservado.id_factura">
+            <summary>mandatory</summary>
+        </member>
+        <member name="P:api_aggregations.Models.ProdutoReservado.valor_tarifa_origem">
+            <summary>mandatory</summary>
+        </member>
+        <member name="P:api_aggregations.Models.ProdutoReservado.tipo_tarifa">
+            <summary>optional</summary>
+        </member>
+        <member name="P:api_aggregations.Models.ProdutoReservado.data_cancelamento">
+            <summary>mandatory</summary>
+        </member>
+        <member name="P:api_aggregations.Models.ProdutoReservado.cancel_fee_aplicado">
+            <summary>mandatory</summary>
+        </member>
+        <member name="P:api_aggregations.Models.ProdutoReservado.data_actualizacao">
+            <summary>mandatory</summary>
+        </member>
+        <member name="P:api_aggregations.Models.ProdutoReservado.data_criacao">
+            <summary>mandatory</summary>
+        </member>
+        <member name="P:api_aggregations.Models.ProdutoReservado.checkin_hora">
+            <summary>optional</summary>
+        </member>
+        <member name="P:api_aggregations.Models.ProdutoReservado.total_imp_sob_taxas_tarifa">
+            <summary>mandatory</summary>
+        </member>
+        <member name="P:api_aggregations.Models.ProdutoReservado.total_imp_sob_supl">
+            <summary>mandatory</summary>
+        </member>
+        <member name="P:api_aggregations.Models.ProdutoReservado.total_impostos">
+            <summary>mandatory</summary>
+        </member>
+        <member name="P:api_aggregations.Models.ProdutoReservado.total_suplementos">
+            <summary>mandatory</summary>
+        </member>
+        <member name="P:api_aggregations.Models.ProdutoReservado.id_externo">
+            <summary>mandatory</summary>
+        </member>
+        <member name="P:api_aggregations.Models.ProdutoReservado.sistema_externo">
+            <summary>mandatory</summary>
+        </member>
+        <member name="P:api_aggregations.Models.ProdutoReservado.refExterno">
+            <summary>mandatory</summary>
+        </member>
+        <member name="P:api_aggregations.Models.ProdutoReservado.id_ponto_partida">
+            <summary>mandatory</summary>
+        </member>
+        <member name="P:api_aggregations.Models.ProdutoReservado.id_ponto_consumo">
+            <summary>mandatory</summary>
+        </member>
+        <member name="P:api_aggregations.Models.ProdutoReservado.id_ponto_destino">
+            <summary>mandatory</summary>
+        </member>
+        <member name="P:api_aggregations.Models.ProdutoReservado.nome_produto">
+            <summary>mandatory</summary>
+        </member>
+        <member name="P:api_aggregations.Models.ProdutoReservado.n_factura">
+            <summary>mandatory</summary>
+        </member>
+        <member name="P:api_aggregations.Models.ProdutoReservado.obs_factura">
+            <summary>mandatory</summary>
+        </member>
+        <member name="P:api_aggregations.Models.ProdutoReservado.id_disp_base">
+            <summary>mandatory</summary>
+        </member>
+        <member name="P:api_aggregations.Models.ProdutoReservado.id_lugar">
+            <summary>mandatory</summary>
+        </member>
+        <member name="P:api_aggregations.Models.ProdutoReservado.valor_comissao_suplementos">
+            <summary>mandatory</summary>
+        </member>
+        <member name="P:api_aggregations.Models.ProdutoReservado.UserConfirmacao">
+            <summary>optional</summary>
+        </member>
+        <member name="P:api_aggregations.Models.ProdutoReservado.UserCheckIn">
+            <summary>optional</summary>
+        </member>
+        <member name="P:api_aggregations.Models.ProdutoReservado.UserCancelamento">
+            <summary>optional</summary>
+        </member>
+        <member name="P:api_aggregations.Models.ProdutoReservado.IdUserConfirmacao">
+            <summary>optional</summary>
+        </member>
+        <member name="P:api_aggregations.Models.ProdutoReservado.IdUserCheckIn">
+            <summary>optional</summary>
+        </member>
+        <member name="P:api_aggregations.Models.ProdutoReservado.IdUserCancelamento">
+            <summary>optional</summary>
+        </member>
+        <member name="P:api_aggregations.Models.ProdutoReservado.DataCheckIn">
+            <summary>optional</summary>
+        </member>
+        <member name="P:api_aggregations.Models.ProdutoReservado.DataConfirmacao">
+            <summary>optional</summary>
+        </member>
+        <member name="P:api_aggregations.Models.ProdutoReservado.id_canal">
+            <summary>mandatory</summary>
+        </member>
+        <member name="P:api_aggregations.Models.ProdutoReservado.id_codigoDesconto">
+            <summary>mandatory</summary>
+        </member>
+        <member name="P:api_aggregations.Models.ProdutoReservado.data_embarque">
+            <summary>mandatory</summary>
+        </member>
+        <member name="P:api_aggregations.Models.ProdutoReservado.data_desembarque">
+            <summary>mandatory</summary>
+        </member>
+        <member name="P:api_aggregations.Models.ProdutoReservado.descontoAutomatico">
+            <summary>mandatory</summary>
+        </member>
+        <member name="P:api_aggregations.Models.Reserva.id">
+            <summary>mandatory</summary>
+        </member>
+        <member name="P:api_aggregations.Models.Reserva.numero">
+            <summary>optional</summary>
+        </member>
+        <member name="P:api_aggregations.Models.Reserva.tipo">
+            <summary>optional</summary>
+        </member>
+        <member name="P:api_aggregations.Models.Reserva.estado">
+            <summary>optional</summary>
+        </member>
+        <member name="P:api_aggregations.Models.Reserva.data_pedido">
+            <summary>optional</summary>
+        </member>
+        <member name="P:api_aggregations.Models.Reserva.data_anulacao">
+            <summary>optional</summary>
+        </member>
+        <member name="P:api_aggregations.Models.Reserva.id_vendedor">
+            <summary>mandatory</summary>
+        </member>
+        <member name="P:api_aggregations.Models.Reserva.referencia">
+            <summary>optional</summary>
+        </member>
+        <member name="P:api_aggregations.Models.Reserva.observacoes">
+            <summary>optional</summary>
+        </member>
+        <member name="P:api_aggregations.Models.Reserva.id_externo">
+            <summary>mandatory</summary>
+        </member>
+        <member name="P:api_aggregations.Models.Reserva.sistema_externo">
+            <summary>mandatory</summary>
+        </member>
+        <member name="P:api_aggregations.Models.Reserva.data_actualizacao">
+            <summary>mandatory</summary>
+        </member>
+        <member name="P:api_aggregations.Models.Reserva.estado_pagamento">
+            <summary>mandatory</summary>
+        </member>
+        <member name="P:api_aggregations.Models.Reserva.id_canal">
+            <summary>mandatory</summary>
+        </member>
+        <member name="P:api_aggregations.Models.Reserva.nome_utilizador_confirmacao">
+            <summary>mandatory</summary>
         </member>
         <member name="T:Program">
             <summary>

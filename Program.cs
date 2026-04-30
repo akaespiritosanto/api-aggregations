@@ -59,6 +59,7 @@ builder.Services.AddSwaggerGen(options =>
 
 builder.Services.AddScoped<ProdutoReservadoService>();
 builder.Services.AddScoped<ReservaService>();
+builder.Services.AddScoped<RelatorioValoresEDuracaoReservasService>();
 builder.Services.AddSingleton<ApiKeyAuthFilter>();
 
 var app = builder.Build();

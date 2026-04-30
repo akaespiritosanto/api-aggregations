@@ -1,0 +1,9 @@
+c:\Users\afons\Desktop\api-aggregations\temp-obj\Debug\net10.0\api-agregations.csproj.AssemblyReference.cache
+c:\Users\afons\Desktop\api-aggregations\temp-obj\Debug\net10.0\rpswa.dswa.cache.json
+c:\Users\afons\Desktop\api-aggregations\temp-obj\Debug\net10.0\api-agregations.GeneratedMSBuildEditorConfig.editorconfig
+c:\Users\afons\Desktop\api-aggregations\temp-obj\Debug\net10.0\api-agregations.AssemblyInfoInputs.cache
+c:\Users\afons\Desktop\api-aggregations\temp-obj\Debug\net10.0\api-agregations.AssemblyInfo.cs
+c:\Users\afons\Desktop\api-aggregations\temp-obj\Debug\net10.0\api-agregations.csproj.CoreCompileInputs.cache
+c:\Users\afons\Desktop\api-aggregations\temp-obj\Debug\net10.0\api-agregations.MvcApplicationPartsAssemblyInfo.cs
+c:\Users\afons\Desktop\api-aggregations\temp-obj\Debug\net10.0\api-agregations.MvcApplicationPartsAssemblyInfo.cache
+c:\Users\afons\Desktop\api-aggregations\temp-obj\Debug\net10.0\api-agregations.sourcelink.json

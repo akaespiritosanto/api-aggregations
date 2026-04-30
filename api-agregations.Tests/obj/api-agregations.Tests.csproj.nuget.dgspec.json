@@ -10,7 +10,7 @@
         "projectUniqueName": "C:\\Users\\afons\\Desktop\\api-aggregations\\api-agregations.csproj",
         "projectName": "api-agregations",
         "projectPath": "C:\\Users\\afons\\Desktop\\api-aggregations\\api-agregations.csproj",
-        "packagesPath": "C:\\Users\\afons\\Desktop\\api-aggregations\\.dotnet_home\\.nuget\\packages\\",
+        "packagesPath": "C:\\Users\\afons\\.nuget\\packages\\",
         "outputPath": "C:\\Users\\afons\\Desktop\\api-aggregations\\obj\\",
         "projectStyle": "PackageReference",
         "configFilePaths": [
@@ -510,7 +510,7 @@
         "projectUniqueName": "C:\\Users\\afons\\Desktop\\api-aggregations\\api-agregations.Tests\\api-agregations.Tests.csproj",
         "projectName": "api-agregations.Tests",
         "projectPath": "C:\\Users\\afons\\Desktop\\api-aggregations\\api-agregations.Tests\\api-agregations.Tests.csproj",
-        "packagesPath": "C:\\Users\\afons\\Desktop\\api-aggregations\\.dotnet_home\\.nuget\\packages\\",
+        "packagesPath": "C:\\Users\\afons\\.nuget\\packages\\",
         "outputPath": "C:\\Users\\afons\\Desktop\\api-aggregations\\api-agregations.Tests\\obj\\",
         "projectStyle": "PackageReference",
         "configFilePaths": [
