@@ -26,6 +26,7 @@ builder.Services.AddControllers(options =>
 builder.Services.AddValidation();
 builder.Services.AddEndpointsApiExplorer();
 builder.Services.AddSqlServer<AppDbContext>(connString);
+builder.Services.AddCors();
 
 builder.Services.AddSwaggerGen(options =>
 {
@@ -71,6 +72,27 @@ if (app.Environment.IsDevelopment())
 }
 
 app.UseHttpsRedirection();
+
+var corsOrigin = builder.Configuration.GetValue("CORS-origin", "*") ?? "*";
+var corsOrigins = corsOrigin.Replace(" ", "").Split(",", StringSplitOptions.RemoveEmptyEntries);
+
+app.UseCors(policy =>
+{
+    if (corsOrigins.Length == 1 && corsOrigins[0] == "*")
+    {
+        policy.AllowAnyOrigin();
+    }
+    else
+    {
+        policy.WithOrigins(corsOrigins);
+    }
+
+    policy
+        .AllowAnyMethod()
+        .AllowAnyHeader()
+        .WithExposedHeaders("X-LANGUAGE");
+});
+
 app.UseAuthorization();
 app.MapControllers();
 

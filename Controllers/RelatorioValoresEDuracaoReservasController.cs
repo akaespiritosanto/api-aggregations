@@ -16,11 +16,11 @@ public class RelatorioValoresEDuracaoReservasController : ControllerBase
     }
 
     /// <summary>
-    /// Returns totals grouped by month and place.
+    /// Returns totals grouped by month and product.
     /// </summary>
     /// <param name="query">mandatory</param>
     /// <param name="cancellationToken">mandatory</param>
-    /// <returns>Totals grouped by month and by place.</returns>
+    /// <returns>Totals grouped by month and by product.</returns>
     [HttpGet("totaisProduto")]
     [ProducesResponseType(typeof(TotaisProdutoDto), StatusCodes.Status200OK)]
     [ProducesResponseType(typeof(ProblemDetails), StatusCodes.Status400BadRequest)]

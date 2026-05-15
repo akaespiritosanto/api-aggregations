@@ -79,7 +79,7 @@ public class RelatorioValoresEDuracaoReservasService
         var dataInicio = DateStringHelper.ParseDateOrNull(query.dataInicio);
         var dataFim = DateStringHelper.ParseDateOrNull(query.dataFim);
 
-        var relatorio = _context.RelatorioValoresEDuracaoReservas
+        var relatorio = GetRelatorioQuery()
             .AsNoTracking();
 
         if (query.idServico.HasValue)
@@ -132,6 +132,31 @@ public class RelatorioValoresEDuracaoReservasService
             .OrderBy(r => r.DataInicio)
             .ThenBy(r => r.Lugar)
             .ToList();
+    }
+
+    private IQueryable<RelatorioValoresEDuracaoReservas> GetRelatorioQuery()
+    {
+        if (!_context.Database.IsSqlServer())
+        {
+            return _context.RelatorioValoresEDuracaoReservas;
+        }
+
+        return _context.RelatorioValoresEDuracaoReservas.FromSqlRaw(
+            """
+            SELECT
+                [DataInicio],
+                [DataFim],
+                [IdServico],
+                [IdProduto],
+                [AbreviaturaProduto],
+                [IdDispBase],
+                [RefDispBase],
+                [Lugar],
+                [Quantidade],
+                [Duracao],
+                CAST([Valor] AS decimal(18, 4)) AS [Valor]
+            FROM [RelatorioValoresEDuracaoReservas]
+            """);
     }
 
     private static List<RelatorioMesTotaisLugarDto> BuildProductMonths(List<RelatorioLinha> linhas)

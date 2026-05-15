@@ -72,11 +72,11 @@
         </member>
         <member name="M:api_aggregations.Controllers.RelatorioValoresEDuracaoReservasController.GetTotaisProduto(api_aggregations.Dtos.TotaisQuery,System.Threading.CancellationToken)">
             <summary>
-            Returns totals grouped by month and place.
+            Returns totals grouped by month and product.
             </summary>
             <param name="query">mandatory</param>
             <param name="cancellationToken">mandatory</param>
-            <returns>Totals grouped by month and by place.</returns>
+            <returns>Totals grouped by month and by product.</returns>
         </member>
         <member name="M:api_aggregations.Controllers.RelatorioValoresEDuracaoReservasController.GetTotaisLugar(api_aggregations.Dtos.TotaisQuery,System.Threading.CancellationToken)">
             <summary>
