@@ -27,6 +27,10 @@ public class RelatorioValoresEDuracaoReservasService
         var totaisValorProdutoAno = BuildProductYearTotals(linhas, useDuration: false);
         var totaisDuracaoProdutoAno = BuildProductYearTotals(linhas, useDuration: true);
 
+        meses = RemoveZeroProductMonthItems(meses);
+        totaisValorProdutoAno = RemoveZeroProductYearItems(totaisValorProdutoAno);
+        totaisDuracaoProdutoAno = RemoveZeroProductYearItems(totaisDuracaoProdutoAno);
+
         return new TotaisProdutoDto
         {
             meses = meses,
@@ -45,6 +49,10 @@ public class RelatorioValoresEDuracaoReservasService
         var meses = BuildPlaceMonths(linhas);
         var totaisValorLugarAno = BuildPlaceYearTotals(linhas, useDuration: false);
         var totaisDuracaoLugarAno = BuildPlaceYearTotals(linhas, useDuration: true);
+
+        meses = RemoveZeroPlaceMonthItems(meses);
+        totaisValorLugarAno = RemoveZeroPlaceYearItems(totaisValorLugarAno);
+        totaisDuracaoLugarAno = RemoveZeroPlaceYearItems(totaisDuracaoLugarAno);
 
         return new TotaisLugarDto
         {
@@ -132,6 +140,144 @@ public class RelatorioValoresEDuracaoReservasService
             .OrderBy(r => r.DataInicio)
             .ThenBy(r => r.Lugar)
             .ToList();
+    }
+
+    private static List<RelatorioMesTotaisLugarDto> RemoveZeroProductMonthItems(
+        List<RelatorioMesTotaisLugarDto> meses)
+    {
+        var filteredMonths = new List<RelatorioMesTotaisLugarDto>();
+
+        foreach (var mes in meses)
+        {
+            var produtos = RemoveZeroProductItems(mes.produtos);
+
+            if (mes.ano == 0 ||
+                mes.mes == 0 ||
+                mes.totalValorMes == 0 ||
+                mes.totalDuracaoMes == 0 ||
+                produtos.Count == 0)
+            {
+                continue;
+            }
+
+            filteredMonths.Add(new RelatorioMesTotaisLugarDto
+            {
+                ano = mes.ano,
+                mes = mes.mes,
+                nome = mes.nome,
+                produtos = produtos,
+                totalValorMes = mes.totalValorMes,
+                totalDuracaoMes = mes.totalDuracaoMes
+            });
+        }
+
+        return filteredMonths;
+    }
+
+    private static List<RelatorioProdutoMesDto> RemoveZeroProductItems(
+        List<RelatorioProdutoMesDto> produtos)
+    {
+        var filteredProducts = new List<RelatorioProdutoMesDto>();
+
+        foreach (var produto in produtos)
+        {
+            if (produto.id == "0" ||
+                produto.valor == 0 ||
+                produto.duracao == 0)
+            {
+                continue;
+            }
+
+            filteredProducts.Add(produto);
+        }
+
+        return filteredProducts;
+    }
+
+    private static List<RelatorioTotalProdutoAnoDto> RemoveZeroProductYearItems(
+        List<RelatorioTotalProdutoAnoDto> totais)
+    {
+        var filteredTotals = new List<RelatorioTotalProdutoAnoDto>();
+
+        foreach (var total in totais)
+        {
+            if (total.id == "0" || total.valor == 0)
+            {
+                continue;
+            }
+
+            filteredTotals.Add(total);
+        }
+
+        return filteredTotals;
+    }
+
+    private static List<TotaisMesLugarDto> RemoveZeroPlaceMonthItems(
+        List<TotaisMesLugarDto> meses)
+    {
+        var filteredMonths = new List<TotaisMesLugarDto>();
+
+        foreach (var mes in meses)
+        {
+            var lugares = RemoveZeroPlaceItems(mes.lugares);
+
+            if (mes.ano == 0 ||
+                mes.mes == 0 ||
+                mes.totalValorMes == 0 ||
+                mes.totalDuracaoMes == 0 ||
+                lugares.Count == 0)
+            {
+                continue;
+            }
+
+            filteredMonths.Add(new TotaisMesLugarDto
+            {
+                ano = mes.ano,
+                mes = mes.mes,
+                nome = mes.nome,
+                lugares = lugares,
+                totalValorMes = mes.totalValorMes,
+                totalDuracaoMes = mes.totalDuracaoMes
+            });
+        }
+
+        return filteredMonths;
+    }
+
+    private static List<TotaisLugarItemDto> RemoveZeroPlaceItems(
+        List<TotaisLugarItemDto> lugares)
+    {
+        var filteredPlaces = new List<TotaisLugarItemDto>();
+
+        foreach (var lugar in lugares)
+        {
+            if (lugar.valor == 0 || lugar.duracao == 0)
+            {
+                continue;
+            }
+
+            filteredPlaces.Add(lugar);
+        }
+
+        return filteredPlaces;
+    }
+
+    private static List<TotaisTotalLugarAnoDto> RemoveZeroPlaceYearItems(
+        List<TotaisTotalLugarAnoDto> totais)
+    {
+        var filteredTotals = new List<TotaisTotalLugarAnoDto>();
+
+        foreach (var total in totais)
+        {
+            if (total.valor == 0)
+            {
+                continue;
+            }
+
+            filteredTotals.Add(total);
+        }
+
+        return filteredTotals;
     }
 
     private IQueryable<RelatorioValoresEDuracaoReservas> GetRelatorioQuery()
