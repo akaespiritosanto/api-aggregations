@@ -29,6 +29,8 @@ public class RemoveZeroArrayItemsFilter : IActionFilter
 
     private static void RemoveZeroItemsFromObject(object value)
     {
+        // This looks at every public property in the object.
+        // Example: meses, produtos, Items, totalCount, etc.
         var properties = value.GetType().GetProperties(BindingFlags.Public | BindingFlags.Instance);
 
         foreach (var property in properties)
@@ -55,6 +57,7 @@ public class RemoveZeroArrayItemsFilter : IActionFilter
 
     private static void RemoveZeroItemsFromList(IList list)
     {
+        // Go from the end to the start so removing items does not skip any item.
         for (var index = list.Count - 1; index >= 0; index--)
         {
             var item = list[index];
@@ -76,6 +79,7 @@ public class RemoveZeroArrayItemsFilter : IActionFilter
 
     private static bool ItemHasZeroField(object item)
     {
+        // If any public property in this item is zero, the item should not be returned.
         var properties = item.GetType().GetProperties(BindingFlags.Public | BindingFlags.Instance);
 
         foreach (var property in properties)

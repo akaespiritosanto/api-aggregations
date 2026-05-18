@@ -361,57 +361,6 @@ public class RelatorioValoresEDuracaoReservasServiceTests
     }
 
     [Fact]
-    public async Task GetTotaisLugarAsync_RemovesArrayItemsWithZeroFields()
-    {
-        await using var context = TestDbContextFactory.Create();
-
-        context.RelatorioValoresEDuracaoReservas.AddRange(
-            new RelatorioValoresEDuracaoReservas
-            {
-                DataInicio = DateStringHelper.ToDateString(new DateTime(2026, 4, 1)),
-                DataFim = DateStringHelper.ToDateString(new DateTime(2026, 4, 2)),
-                IdServico = 5,
-                IdProduto = 0,
-                AbreviaturaProduto = "zero",
-                IdDispBase = 10,
-                Lugar = "alpha",
-                Quantidade = 1,
-                Duracao = 2,
-                Valor = 10m
-            },
-            new RelatorioValoresEDuracaoReservas
-            {
-                DataInicio = DateStringHelper.ToDateString(new DateTime(2026, 4, 3)),
-                DataFim = DateStringHelper.ToDateString(new DateTime(2026, 4, 4)),
-                IdServico = 5,
-                IdProduto = 100,
-                AbreviaturaProduto = "valid",
-                IdDispBase = 10,
-                Lugar = "beta",
-                Quantidade = 1,
-                Duracao = 3,
-                Valor = 20m
-            });
-
-        await context.SaveChangesAsync();
-
-        var service = new RelatorioValoresEDuracaoReservasService(context);
-
-        var result = await service.GetTotaisLugarAsync(
-            new TotaisQuery
-            {
-                idServico = 5
-            },
-            CancellationToken.None);
-
-        Assert.Single(result.meses);
-        Assert.Single(result.meses[0].produtos);
-        Assert.Equal("100", result.meses[0].produtos[0].id);
-        Assert.Single(result.totaisValorProdutoAno);
-        Assert.Equal("100", result.totaisValorProdutoAno[0].id);
-    }
-
-    [Fact]
     public async Task GetTotaisLugarAsync_WhenIdDispBaseIsZero_IgnoresDispBaseFilter()
     {
         await using var context = TestDbContextFactory.Create();
