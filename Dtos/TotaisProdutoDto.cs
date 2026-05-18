@@ -1,11 +1,15 @@
 namespace api_aggregations.Dtos;
 
+using System.Text.Json.Serialization;
+
 public sealed class TotaisProdutoDto
 {
     public required List<RelatorioMesTotaisLugarDto> meses { get; init; }
     public required List<RelatorioTotalProdutoAnoDto> totaisValorProdutoAno { get; init; }
+    [JsonIgnore(Condition = JsonIgnoreCondition.WhenWritingDefault)]
     public required decimal totaisValorAno { get; init; }
     public required List<RelatorioTotalProdutoAnoDto> totaisDuracaoProdutoAno { get; init; }
+    [JsonIgnore(Condition = JsonIgnoreCondition.WhenWritingDefault)]
     public required decimal totalDuracaoAno { get; init; }
 }
 
