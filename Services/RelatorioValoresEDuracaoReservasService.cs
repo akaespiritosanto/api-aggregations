@@ -24,8 +24,12 @@ public class RelatorioValoresEDuracaoReservasService
     {
         var linhas = await GetFilteredRowsAsync(query, cancellationToken);
         var meses = BuildProductMonths(linhas, query);
-        var totaisValorProdutoAno = BuildProductYearTotals(linhas, useDuration: false);
-        var totaisDuracaoProdutoAno = BuildProductYearTotals(linhas, useDuration: true);
+        var totaisValorProdutoAno = BuildProductYearTotals(linhas, useDuration: false)
+            .Where(produto => produto.valor != 0)
+            .ToList();
+        var totaisDuracaoProdutoAno = BuildProductYearTotals(linhas, useDuration: true)
+            .Where(produto => produto.valor != 0)
+            .ToList();
 
         return new TotaisProdutoDto
         {
@@ -43,8 +47,12 @@ public class RelatorioValoresEDuracaoReservasService
     {
         var linhas = await GetFilteredRowsAsync(query, cancellationToken);
         var meses = BuildPlaceMonths(linhas, query);
-        var totaisValorLugarAno = BuildPlaceYearTotals(linhas, useDuration: false);
-        var totaisDuracaoLugarAno = BuildPlaceYearTotals(linhas, useDuration: true);
+        var totaisValorLugarAno = BuildPlaceYearTotals(linhas, useDuration: false)
+            .Where(lugar => lugar.valor != 0)
+            .ToList();
+        var totaisDuracaoLugarAno = BuildPlaceYearTotals(linhas, useDuration: true)
+            .Where(lugar => lugar.valor != 0)
+            .ToList();
 
         return new TotaisLugarDto
         {

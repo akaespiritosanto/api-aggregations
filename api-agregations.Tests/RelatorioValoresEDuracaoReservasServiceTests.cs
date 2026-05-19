@@ -513,4 +513,98 @@ public class RelatorioValoresEDuracaoReservasServiceTests
         Assert.Equal(5m, result.totalDuracaoAno);
         Assert.Equal(2, result.totaisValorLugarAno.Count);
     }
+
+    [Fact]
+    public async Task GetTotaisLugarAsync_ExcludesZeroValorFromTotaisArrays()
+    {
+        await using var context = TestDbContextFactory.Create();
+
+        context.RelatorioValoresEDuracaoReservas.AddRange(
+            new RelatorioValoresEDuracaoReservas
+            {
+                DataInicio = DateStringHelper.ToDateString(new DateTime(2026, 4, 1)),
+                DataFim = DateStringHelper.ToDateString(new DateTime(2026, 4, 2)),
+                IdServico = 5,
+                IdProduto = 100,
+                AbreviaturaProduto = "with-value",
+                IdDispBase = 10,
+                Lugar = "alpha",
+                Quantidade = 1,
+                Duracao = 0,
+                Valor = 50m
+            },
+            new RelatorioValoresEDuracaoReservas
+            {
+                DataInicio = DateStringHelper.ToDateString(new DateTime(2026, 4, 3)),
+                DataFim = DateStringHelper.ToDateString(new DateTime(2026, 4, 4)),
+                IdServico = 5,
+                IdProduto = 101,
+                AbreviaturaProduto = "zero-value",
+                IdDispBase = 10,
+                Lugar = "beta",
+                Quantidade = 1,
+                Duracao = 0,
+                Valor = 0m
+            });
+
+        await context.SaveChangesAsync();
+
+        var service = new RelatorioValoresEDuracaoReservasService(context);
+
+        var result = await service.GetTotaisLugarAsync(new TotaisQuery { idServico = 5 }, CancellationToken.None);
+
+        Assert.Single(result.totaisValorProdutoAno);
+        Assert.Equal("with-value", result.totaisValorProdutoAno[0].nome);
+        Assert.Equal(50m, result.totaisValorAno);
+        Assert.DoesNotContain(result.totaisValorProdutoAno, x => x.valor == 0);
+        Assert.DoesNotContain(result.totaisDuracaoProdutoAno, x => x.valor == 0);
+    }
+
+    [Fact]
+    public async Task GetTotaisLugarPorLugarAsync_ExcludesZeroValorFromTotaisArrays()
+    {
+        await using var context = TestDbContextFactory.Create();
+
+        context.RelatorioValoresEDuracaoReservas.AddRange(
+            new RelatorioValoresEDuracaoReservas
+            {
+                DataInicio = DateStringHelper.ToDateString(new DateTime(2026, 4, 1)),
+                DataFim = DateStringHelper.ToDateString(new DateTime(2026, 4, 2)),
+                IdServico = 5,
+                IdProduto = 100,
+                AbreviaturaProduto = "A",
+                IdDispBase = 10,
+                Lugar = "with-value",
+                Quantidade = 1,
+                Duracao = 0,
+                Valor = 40m
+            },
+            new RelatorioValoresEDuracaoReservas
+            {
+                DataInicio = DateStringHelper.ToDateString(new DateTime(2026, 4, 3)),
+                DataFim = DateStringHelper.ToDateString(new DateTime(2026, 4, 4)),
+                IdServico = 5,
+                IdProduto = 101,
+                AbreviaturaProduto = "B",
+                IdDispBase = 10,
+                Lugar = "zero-value",
+                Quantidade = 1,
+                Duracao = 0,
+                Valor = 0m
+            });
+
+        await context.SaveChangesAsync();
+
+        var service = new RelatorioValoresEDuracaoReservasService(context);
+
+        var result = await service.GetTotaisLugarPorLugarAsync(
+            new TotaisQuery { idServico = 5 },
+            CancellationToken.None);
+
+        Assert.Single(result.totaisValorLugarAno);
+        Assert.Equal("with-value", result.totaisValorLugarAno[0].nome);
+        Assert.Equal(40m, result.totalValorAno);
+        Assert.DoesNotContain(result.totaisValorLugarAno, x => x.valor == 0);
+        Assert.DoesNotContain(result.totaisDuracaoLugarAno, x => x.valor == 0);
+    }
 }

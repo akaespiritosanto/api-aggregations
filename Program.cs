@@ -22,7 +22,6 @@ builder.Services.AddControllers(options =>
 {
     options.Filters.Add<ApiExceptionFilter>();
     options.Filters.AddService<ApiKeyAuthFilter>();
-    options.Filters.Add<RemoveZeroArrayItemsFilter>();
 });
 builder.Services.AddValidation();
 builder.Services.AddEndpointsApiExplorer();
