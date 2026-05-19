@@ -23,7 +23,7 @@ public class RelatorioValoresEDuracaoReservasService
         CancellationToken cancellationToken)
     {
         var linhas = await GetFilteredRowsAsync(query, cancellationToken);
-        var meses = BuildProductMonths(linhas);
+        var meses = BuildProductMonths(linhas, query);
         var totaisValorProdutoAno = BuildProductYearTotals(linhas, useDuration: false);
         var totaisDuracaoProdutoAno = BuildProductYearTotals(linhas, useDuration: true);
 
@@ -42,7 +42,7 @@ public class RelatorioValoresEDuracaoReservasService
         CancellationToken cancellationToken)
     {
         var linhas = await GetFilteredRowsAsync(query, cancellationToken);
-        var meses = BuildPlaceMonths(linhas);
+        var meses = BuildPlaceMonths(linhas, query);
         var totaisValorLugarAno = BuildPlaceYearTotals(linhas, useDuration: false);
         var totaisDuracaoLugarAno = BuildPlaceYearTotals(linhas, useDuration: true);
 
@@ -159,9 +159,9 @@ public class RelatorioValoresEDuracaoReservasService
             """);
     }
 
-    private static List<RelatorioMesTotaisLugarDto> BuildProductMonths(List<RelatorioLinha> linhas)
+    private static List<RelatorioMesTotaisLugarDto> BuildProductMonths(List<RelatorioLinha> linhas, TotaisQuery query)
     {
-        return GroupByMonth(linhas)
+        var meses = GroupByMonth(linhas)
             .Select(group => new RelatorioMesTotaisLugarDto
             {
                 ano = group.Key.Ano,
@@ -183,6 +183,21 @@ public class RelatorioValoresEDuracaoReservasService
                 totalDuracaoMes = group.Sum(x => (decimal)x.Duracao)
             })
             .ToList();
+
+        if (meses.Count == 0 && TryGetSingleRequestedDate(query, out var requestedDate))
+        {
+            meses.Add(new RelatorioMesTotaisLugarDto
+            {
+                ano = requestedDate.Year,
+                mes = requestedDate.Month,
+                nome = GetMonthName(requestedDate.Month),
+                produtos = new List<RelatorioProdutoMesDto>(),
+                totalValorMes = 0m,
+                totalDuracaoMes = 0m
+            });
+        }
+
+        return meses;
     }
 
     private static List<RelatorioTotalProdutoAnoDto> BuildProductYearTotals(List<RelatorioLinha> linhas, bool useDuration)
@@ -200,9 +215,9 @@ public class RelatorioValoresEDuracaoReservasService
             .ToList();
     }
 
-    private static List<TotaisMesLugarDto> BuildPlaceMonths(List<RelatorioLinha> linhas)
+    private static List<TotaisMesLugarDto> BuildPlaceMonths(List<RelatorioLinha> linhas, TotaisQuery query)
     {
-        return GroupByMonth(linhas)
+        var meses = GroupByMonth(linhas)
             .Select(group => new TotaisMesLugarDto
             {
                 ano = group.Key.Ano,
@@ -224,6 +239,21 @@ public class RelatorioValoresEDuracaoReservasService
                 totalDuracaoMes = group.Sum(x => (decimal)x.Duracao)
             })
             .ToList();
+
+        if (meses.Count == 0 && TryGetSingleRequestedDate(query, out var requestedDate))
+        {
+            meses.Add(new TotaisMesLugarDto
+            {
+                ano = requestedDate.Year,
+                mes = requestedDate.Month,
+                nome = GetMonthName(requestedDate.Month),
+                lugares = new List<TotaisLugarItemDto>(),
+                totalValorMes = 0m,
+                totalDuracaoMes = 0m
+            });
+        }
+
+        return meses;
     }
 
     private static List<TotaisTotalLugarAnoDto> BuildPlaceYearTotals(List<RelatorioLinha> linhas, bool useDuration)
@@ -252,6 +282,23 @@ public class RelatorioValoresEDuracaoReservasService
     private static string GetMonthName(int month)
     {
         return PtPtCulture.DateTimeFormat.GetMonthName(month).ToLower();
+    }
+
+    private static bool TryGetSingleRequestedDate(TotaisQuery query, out DateTime requestedDate)
+    {
+        var dataInicio = DateStringHelper.ParseDateOrNull(query.dataInicio);
+        var dataFim = DateStringHelper.ParseDateOrNull(query.dataFim);
+
+        if (dataInicio.HasValue &&
+            dataFim.HasValue &&
+            dataInicio.Value.Date == dataFim.Value.Date)
+        {
+            requestedDate = dataInicio.Value.Date;
+            return true;
+        }
+
+        requestedDate = default;
+        return false;
     }
 
     private sealed class RelatorioLinha

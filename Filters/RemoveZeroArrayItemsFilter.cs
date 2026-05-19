@@ -79,12 +79,15 @@ public class RemoveZeroArrayItemsFilter : IActionFilter
 
     private static bool ItemHasZeroField(object item)
     {
-        // If any public property in this item is zero, the item should not be returned.
+        // Only these main fields decide if an array item should be removed.
+        // Values like valor, duracao, totalValorMes can be 0 and still be valid.
         var properties = item.GetType().GetProperties(BindingFlags.Public | BindingFlags.Instance);
 
         foreach (var property in properties)
         {
-            if (!property.CanRead || property.GetIndexParameters().Length > 0)
+            if (!property.CanRead ||
+                property.GetIndexParameters().Length > 0 ||
+                IsFieldThatCanRemoveItem(property.Name) == false)
             {
                 continue;
             }
@@ -98,6 +101,18 @@ public class RemoveZeroArrayItemsFilter : IActionFilter
         }
 
         return false;
+    }
+
+    private static bool IsFieldThatCanRemoveItem(string propertyName)
+    {
+        var name = propertyName.ToLowerInvariant();
+
+        return name == "id" ||
+            name == "ano" ||
+            name == "mes" ||
+            name == "dia" ||
+            name == "id_vendedor" ||
+            name == "id_entidade";
     }
 
     private static bool IsZero(object? value)

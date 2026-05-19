@@ -361,6 +361,60 @@ public class RelatorioValoresEDuracaoReservasServiceTests
     }
 
     [Fact]
+    public async Task GetTotaisLugarAsync_WhenSingleRequestedDateHasNoRows_ReturnsRequestedMonth()
+    {
+        await using var context = TestDbContextFactory.Create();
+        var service = new RelatorioValoresEDuracaoReservasService(context);
+
+        var requestedDate = new DateTime(2026, 4, 15);
+
+        var result = await service.GetTotaisLugarAsync(
+            new TotaisQuery
+            {
+                dataInicio = DateStringHelper.ToDateString(requestedDate),
+                dataFim = DateStringHelper.ToDateString(requestedDate)
+            },
+            CancellationToken.None);
+
+        Assert.Single(result.meses);
+        Assert.Equal(2026, result.meses[0].ano);
+        Assert.Equal(4, result.meses[0].mes);
+        Assert.Equal("abril", result.meses[0].nome);
+        Assert.Empty(result.meses[0].produtos);
+        Assert.Equal(0m, result.meses[0].totalValorMes);
+        Assert.Equal(0m, result.meses[0].totalDuracaoMes);
+        Assert.Equal(0m, result.totaisValorAno);
+        Assert.Equal(0m, result.totalDuracaoAno);
+    }
+
+    [Fact]
+    public async Task GetTotaisLugarPorLugarAsync_WhenSingleRequestedDateHasNoRows_ReturnsRequestedMonth()
+    {
+        await using var context = TestDbContextFactory.Create();
+        var service = new RelatorioValoresEDuracaoReservasService(context);
+
+        var requestedDate = new DateTime(2026, 4, 15);
+
+        var result = await service.GetTotaisLugarPorLugarAsync(
+            new TotaisQuery
+            {
+                dataInicio = DateStringHelper.ToDateString(requestedDate),
+                dataFim = DateStringHelper.ToDateString(requestedDate)
+            },
+            CancellationToken.None);
+
+        Assert.Single(result.meses);
+        Assert.Equal(2026, result.meses[0].ano);
+        Assert.Equal(4, result.meses[0].mes);
+        Assert.Equal("abril", result.meses[0].nome);
+        Assert.Empty(result.meses[0].lugares);
+        Assert.Equal(0m, result.meses[0].totalValorMes);
+        Assert.Equal(0m, result.meses[0].totalDuracaoMes);
+        Assert.Equal(0m, result.totalValorAno);
+        Assert.Equal(0m, result.totalDuracaoAno);
+    }
+
+    [Fact]
     public async Task GetTotaisLugarAsync_WhenIdDispBaseIsZero_IgnoresDispBaseFilter()
     {
         await using var context = TestDbContextFactory.Create();

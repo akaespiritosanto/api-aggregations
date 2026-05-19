@@ -14,8 +14,8 @@ public class RemoveZeroArrayItemsFilterTests
     {
         var returnedItems = new List<TestItem>
         {
-            new TestItem { id = 0, name = "remove" },
-            new TestItem { id = 1, name = "keep" }
+            new TestItem { id = 0, name = "remove", valor = 10 },
+            new TestItem { id = 1, name = "keep", valor = 0 }
         };
 
         var context = CreateActionExecutedContext(returnedItems);
@@ -48,5 +48,6 @@ public class RemoveZeroArrayItemsFilterTests
     {
         public required int id { get; init; }
         public required string name { get; init; }
+        public required decimal valor { get; init; }
     }
 }
