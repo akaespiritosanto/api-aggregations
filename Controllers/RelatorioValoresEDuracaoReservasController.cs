@@ -9,10 +9,14 @@ using Microsoft.AspNetCore.Mvc;
 public class RelatorioValoresEDuracaoReservasController : ControllerBase
 {
     private readonly RelatorioValoresEDuracaoReservasService _service;
+    private readonly RelatorioExcelExportService _excelExportService;
 
-    public RelatorioValoresEDuracaoReservasController(RelatorioValoresEDuracaoReservasService service)
+    public RelatorioValoresEDuracaoReservasController(
+        RelatorioValoresEDuracaoReservasService service,
+        RelatorioExcelExportService excelExportService)
     {
         _service = service;
+        _excelExportService = excelExportService;
     }
 
     /// <summary>
@@ -29,7 +33,9 @@ public class RelatorioValoresEDuracaoReservasController : ControllerBase
         [FromQuery] TotaisQuery query,
         CancellationToken cancellationToken)
     {
-        var result = await _service.GetTotaisLugarAsync(query, cancellationToken);
+        // Returns JSON totals. Use /exportar when the same information is needed
+        // as a downloadable Excel file.
+        var result = await _service.GetTotaisProdutoAsync(query, cancellationToken);
         return Ok(result);
     }
 
@@ -67,5 +73,29 @@ public class RelatorioValoresEDuracaoReservasController : ControllerBase
     {
         var result = await _service.GetDisponibilidadesBaseAsync(query, cancellationToken);
         return Ok(result);
+    }
+
+    /// <summary>
+    /// Exports one totals report to an Excel file.
+    /// </summary>
+    /// <param name="query">Use agruparPor=produto/lugar and mostrar=valor/duracao.</param>
+    /// <param name="cancellationToken">mandatory</param>
+    /// <returns>An Excel file with the selected totals.</returns>
+    [HttpGet("exportar")]
+    [ProducesResponseType(typeof(FileContentResult), StatusCodes.Status200OK)]
+    [ProducesResponseType(typeof(ProblemDetails), StatusCodes.Status400BadRequest)]
+    [ProducesResponseType(typeof(ProblemDetails), StatusCodes.Status500InternalServerError)]
+    public async Task<IActionResult> Exportar(
+        [FromQuery] ExportarTotaisQuery query,
+        CancellationToken cancellationToken)
+    {
+        // The Excel service validates agruparPor/mostrar and returns valid .xlsx bytes.
+        var excelBytes = await _excelExportService.CriarExcelAsync(query, cancellationToken);
+        var fileName = $"{DateTime.UtcNow:yyyyMMdd_HHmmss}_pesquisa.xlsx";
+
+        return File(
+            excelBytes,
+            "application/vnd.openxmlformats-officedocument.spreadsheetml.sheet",
+            fileName);
     }
 }

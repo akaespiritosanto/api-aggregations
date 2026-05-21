@@ -1,23 +1,24 @@
 using DotNetEnv;
 using Microsoft.EntityFrameworkCore;
-using api_aggregations.Models;
 using api_aggregations.Filters;
 using api_aggregations.Services;
-using api_aggregations.Controllers;
 using api_aggregations.Data;
 using Microsoft.OpenApi.Models;
 
-
+// Load local environment variables from .env before reading SECRET/API_KEY.
 Env.Load();
 
 var builder = WebApplication.CreateBuilder(args);
 
+// SECRET is the SQL Server connection string used by Entity Framework.
 var connString = Environment.GetEnvironmentVariable("SECRET")?.Trim().Trim('"');
 if (string.IsNullOrWhiteSpace(connString))
 {
     throw new InvalidOperationException("Missing SQL Server connection string. Set env var SECRET (or provide it via .env).");
 }
 
+// ApiExceptionFilter converts known exceptions into clear ProblemDetails responses.
+// ApiKeyAuthFilter protects the endpoints when API_KEY is configured.
 builder.Services.AddControllers(options =>
 {
     options.Filters.Add<ApiExceptionFilter>();
@@ -28,6 +29,7 @@ builder.Services.AddEndpointsApiExplorer();
 builder.Services.AddSqlServer<AppDbContext>(connString);
 builder.Services.AddCors();
 
+// Swagger is configured with the API key header so it can call protected endpoints.
 builder.Services.AddSwaggerGen(options =>
 {
     var xmlFile = $"{System.Reflection.Assembly.GetExecutingAssembly().GetName().Name}.xml";
@@ -61,6 +63,7 @@ builder.Services.AddSwaggerGen(options =>
 builder.Services.AddScoped<ProdutoReservadoService>();
 builder.Services.AddScoped<ReservaService>();
 builder.Services.AddScoped<RelatorioValoresEDuracaoReservasService>();
+builder.Services.AddScoped<RelatorioExcelExportService>();
 builder.Services.AddSingleton<ApiKeyAuthFilter>();
 
 var app = builder.Build();
@@ -76,6 +79,7 @@ app.UseHttpsRedirection();
 var corsOrigin = builder.Configuration.GetValue("CORS-origin", "*") ?? "*";
 var corsOrigins = corsOrigin.Replace(" ", "").Split(",", StringSplitOptions.RemoveEmptyEntries);
 
+// Allow either one wildcard origin (*) or a comma-separated list of allowed origins.
 app.UseCors(policy =>
 {
     if (corsOrigins.Length == 1 && corsOrigins[0] == "*")
@@ -90,7 +94,7 @@ app.UseCors(policy =>
     policy
         .AllowAnyMethod()
         .AllowAnyHeader()
-        .WithExposedHeaders("X-LANGUAGE");
+        .WithExposedHeaders("X-LANGUAGE", "Content-Disposition");
 });
 
 app.UseAuthorization();

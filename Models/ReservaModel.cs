@@ -26,12 +26,12 @@ public class Reserva
     public string? observacoes { get; set; }
 
     /// <summary>mandatory</summary>
-    public string id_externo { get; set; }
+    public string id_externo { get; set; } = string.Empty;
     /// <summary>mandatory</summary>
     public int sistema_externo { get; set; }
 
     /// <summary>mandatory</summary>
-    public string data_actualizacao { get; set; }
+    public string data_actualizacao { get; set; } = string.Empty;
 
     /// <summary>mandatory</summary>
     public byte estado_pagamento { get; set; }
@@ -40,5 +40,5 @@ public class Reserva
     public int id_canal { get; set; }
 
     /// <summary>mandatory</summary>
-    public string nome_utilizador_confirmacao { get; set; }
+    public string nome_utilizador_confirmacao { get; set; } = string.Empty;
 }

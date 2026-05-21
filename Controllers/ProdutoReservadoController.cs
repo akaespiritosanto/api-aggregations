@@ -38,6 +38,7 @@ public class ProdutoReservadoController : ControllerBase
         [FromQuery] int? id_entidade,
         CancellationToken cancellationToken)
     {
+        // The service decides whether totals are grouped by year, month, or day.
         var result = await _service.GetTotalsAsync(ano, mes, dia, id_entidade, cancellationToken);
         return Ok(result);
     }
@@ -57,6 +58,7 @@ public class ProdutoReservadoController : ControllerBase
     [ProducesResponseType(typeof(ProblemDetails), StatusCodes.Status500InternalServerError)]
     public async Task<ActionResult<PagedResult<ProdutoReservado>>> GetAll([FromQuery] ProdutoReservadoQuery query, CancellationToken cancellationToken)
     {
+        // Query contains pagination and optional filters from the URL.
         var result = await _service.GetAllAsync(query, cancellationToken);
         return Ok(result);
     }
@@ -96,6 +98,8 @@ public class ProdutoReservadoController : ControllerBase
         var created = await _service.CreateAsync(produtoReservado, cancellationToken);
         _logger.LogInformation("ProdutoReservado created with id {Id}", created.id);
 
+        // CreatedAtAction returns HTTP 201 and points to the endpoint that reads
+        // this exact reserved product.
         return CreatedAtAction(nameof(GetById), new { id = created.id }, created);
     }
 

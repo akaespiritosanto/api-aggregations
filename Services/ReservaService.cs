@@ -22,6 +22,8 @@ public class ReservaService
     {
         ValidateDateParts(ano, mes, dia);
 
+        // Totals can be requested by year, by month, or by day.
+        // The grouping level depends on which date filters were supplied.
         var reservas = await BuildTotalsRowsAsync(idVendedor, cancellationToken);
         var filteredReservas = FilterTotalsRows(reservas, ano, mes, dia);
 
@@ -183,6 +185,7 @@ public class ReservaService
 
         return rows.Select(r =>
         {
+            // Use data_pedido when it exists; otherwise fall back to data_actualizacao.
             var data = GetReservaDate(r.data_pedido, r.data_actualizacao);
 
             return new ReservaTotalRow

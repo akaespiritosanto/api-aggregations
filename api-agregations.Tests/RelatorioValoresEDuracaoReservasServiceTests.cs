@@ -8,7 +8,7 @@ using api_aggregations.Utils;
 public class RelatorioValoresEDuracaoReservasServiceTests
 {
     [Fact]
-    public async Task GetTotaisLugarAsync_ReturnsTotalsGroupedByMonthAndLugar()
+    public async Task GetTotaisProdutoAsync_ReturnsTotalsGroupedByMonthAndProduto()
     {
         await using var context = TestDbContextFactory.Create();
 
@@ -88,7 +88,7 @@ public class RelatorioValoresEDuracaoReservasServiceTests
 
         var service = new RelatorioValoresEDuracaoReservasService(context);
 
-        var result = await service.GetTotaisLugarAsync(
+        var result = await service.GetTotaisProdutoAsync(
             new TotaisQuery
             {
                 idServico = 5,
@@ -134,7 +134,7 @@ public class RelatorioValoresEDuracaoReservasServiceTests
     }
 
     [Fact]
-    public async Task GetTotaisLugarAsync_WithoutFilters_ReturnsAllRows()
+    public async Task GetTotaisProdutoAsync_WithoutFilters_ReturnsAllRows()
     {
         await using var context = TestDbContextFactory.Create();
 
@@ -158,7 +158,7 @@ public class RelatorioValoresEDuracaoReservasServiceTests
 
         var service = new RelatorioValoresEDuracaoReservasService(context);
 
-        var result = await service.GetTotaisLugarAsync(new TotaisQuery(), CancellationToken.None);
+        var result = await service.GetTotaisProdutoAsync(new TotaisQuery(), CancellationToken.None);
 
         Assert.Single(result.meses);
         Assert.Equal(100m, result.totaisValorAno);
@@ -346,12 +346,12 @@ public class RelatorioValoresEDuracaoReservasServiceTests
     }
 
     [Fact]
-    public async Task GetTotaisLugarAsync_WhenThereAreNoRows_ReturnsEmptyTotals()
+    public async Task GetTotaisProdutoAsync_WhenThereAreNoRows_ReturnsEmptyTotals()
     {
         await using var context = TestDbContextFactory.Create();
         var service = new RelatorioValoresEDuracaoReservasService(context);
 
-        var result = await service.GetTotaisLugarAsync(new TotaisQuery(), CancellationToken.None);
+        var result = await service.GetTotaisProdutoAsync(new TotaisQuery(), CancellationToken.None);
 
         Assert.Empty(result.meses);
         Assert.Empty(result.totaisValorProdutoAno);
@@ -361,14 +361,14 @@ public class RelatorioValoresEDuracaoReservasServiceTests
     }
 
     [Fact]
-    public async Task GetTotaisLugarAsync_WhenSingleRequestedDateHasNoRows_ReturnsRequestedMonth()
+    public async Task GetTotaisProdutoAsync_WhenSingleRequestedDateHasNoRows_ReturnsRequestedMonth()
     {
         await using var context = TestDbContextFactory.Create();
         var service = new RelatorioValoresEDuracaoReservasService(context);
 
         var requestedDate = new DateTime(2026, 4, 15);
 
-        var result = await service.GetTotaisLugarAsync(
+        var result = await service.GetTotaisProdutoAsync(
             new TotaisQuery
             {
                 dataInicio = DateStringHelper.ToDateString(requestedDate),
@@ -415,7 +415,7 @@ public class RelatorioValoresEDuracaoReservasServiceTests
     }
 
     [Fact]
-    public async Task GetTotaisLugarAsync_WhenIdDispBaseIsZero_IgnoresDispBaseFilter()
+    public async Task GetTotaisProdutoAsync_WhenIdDispBaseIsZero_IgnoresDispBaseFilter()
     {
         await using var context = TestDbContextFactory.Create();
 
@@ -451,7 +451,7 @@ public class RelatorioValoresEDuracaoReservasServiceTests
 
         var service = new RelatorioValoresEDuracaoReservasService(context);
 
-        var result = await service.GetTotaisLugarAsync(
+        var result = await service.GetTotaisProdutoAsync(
             new TotaisQuery
             {
                 idServico = 5,
@@ -515,7 +515,7 @@ public class RelatorioValoresEDuracaoReservasServiceTests
     }
 
     [Fact]
-    public async Task GetTotaisLugarAsync_ExcludesZeroValorFromTotaisArrays()
+    public async Task GetTotaisProdutoAsync_ExcludesZeroValorFromTotaisArrays()
     {
         await using var context = TestDbContextFactory.Create();
 
@@ -551,7 +551,7 @@ public class RelatorioValoresEDuracaoReservasServiceTests
 
         var service = new RelatorioValoresEDuracaoReservasService(context);
 
-        var result = await service.GetTotaisLugarAsync(new TotaisQuery { idServico = 5 }, CancellationToken.None);
+        var result = await service.GetTotaisProdutoAsync(new TotaisQuery { idServico = 5 }, CancellationToken.None);
 
         Assert.Single(result.totaisValorProdutoAno);
         Assert.Equal("with-value", result.totaisValorProdutoAno[0].nome);
@@ -606,5 +606,43 @@ public class RelatorioValoresEDuracaoReservasServiceTests
         Assert.Equal(40m, result.totalValorAno);
         Assert.DoesNotContain(result.totaisValorLugarAno, x => x.valor == 0);
         Assert.DoesNotContain(result.totaisDuracaoLugarAno, x => x.valor == 0);
+    }
+
+    [Fact]
+    public async Task CriarExcelAsync_WithProdutoValor_ReturnsFileBytes()
+    {
+        await using var context = TestDbContextFactory.Create();
+
+        context.RelatorioValoresEDuracaoReservas.Add(
+            new RelatorioValoresEDuracaoReservas
+            {
+                DataInicio = DateStringHelper.ToDateString(new DateTime(2026, 9, 1)),
+                DataFim = DateStringHelper.ToDateString(new DateTime(2026, 9, 2)),
+                IdServico = 5,
+                IdProduto = 100,
+                AbreviaturaProduto = "Bv_Lavar60",
+                IdDispBase = 10,
+                RefDispBase = "Maquina Lavar 2",
+                Lugar = "A1",
+                Quantidade = 1,
+                Duracao = 15,
+                Valor = 20m
+            });
+
+        await context.SaveChangesAsync();
+
+        var relatorioService = new RelatorioValoresEDuracaoReservasService(context);
+        var excelService = new RelatorioExcelExportService(relatorioService);
+
+        var bytes = await excelService.CriarExcelAsync(
+            new ExportarTotaisQuery
+            {
+                agruparPor = "produto",
+                mostrar = "valor",
+                idServico = 5
+            },
+            CancellationToken.None);
+
+        Assert.NotEmpty(bytes);
     }
 }

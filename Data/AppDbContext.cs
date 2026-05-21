@@ -17,6 +17,8 @@ public class AppDbContext(DbContextOptions<AppDbContext> options) : DbContext(op
     {
         base.OnModelCreating(modelBuilder);
 
+        // The database stores some dates as strings. These converters let the
+        // rest of the code work with DateTime where it is safer and clearer.
         var nullableDateConverter = new ValueConverter<string?, DateTime?>(
             value => DateStringHelper.ParseDateOrNull(value),
             value => value.HasValue ? DateStringHelper.ToDateString(value.Value) : null);
@@ -40,6 +42,8 @@ public class AppDbContext(DbContextOptions<AppDbContext> options) : DbContext(op
                 relatorio.Lugar
             });
 
+        // This report table/view has no single Id column, so the natural key is
+        // built from the columns that identify one report row.
         modelBuilder.Entity<RelatorioValoresEDuracaoReservas>()
             .ToTable("RelatorioValoresEDuracaoReservas");
 
@@ -107,10 +111,10 @@ public class AppDbContext(DbContextOptions<AppDbContext> options) : DbContext(op
             .HasConversion(requiredDateConverter);
 
         modelBuilder.Entity<ProdutoReservado>()
-        .HasOne<Reserva>()
-        .WithMany()
-        .HasForeignKey(produtoReservado => produtoReservado.id_reserva)
-        .OnDelete(DeleteBehavior.Cascade);
+            .HasOne<Reserva>()
+            .WithMany()
+            .HasForeignKey(produtoReservado => produtoReservado.id_reserva)
+            .OnDelete(DeleteBehavior.Cascade);
     }
 }
 

@@ -1,6 +1,6 @@
 namespace api_aggregations.Dtos;
 
-public sealed class TotaisQuery
+public class TotaisQuery
 {
     /// <summary>optional</summary>
     public int? idServico { get; set; }

@@ -53,7 +53,7 @@ public class ProdutoReservado
     public double valor_taxas { get; set; }
 
     /// <summary>mandatory</summary>
-    public string ref_taxas { get; set; }
+    public string ref_taxas { get; set; } = string.Empty;
 
     /// <summary>mandatory</summary>
     public int id_factura { get; set; }
@@ -65,15 +65,15 @@ public class ProdutoReservado
     public short? tipo_tarifa { get; set; }
 
     /// <summary>mandatory</summary>
-    public string data_cancelamento { get; set; }
+    public string data_cancelamento { get; set; } = string.Empty;
 
     /// <summary>mandatory</summary>
     public double cancel_fee_aplicado { get; set; }
 
     /// <summary>mandatory</summary>
-    public string data_actualizacao { get; set; }
+    public string data_actualizacao { get; set; } = string.Empty;
     /// <summary>mandatory</summary>
-    public string data_criacao { get; set; }
+    public string data_criacao { get; set; } = string.Empty;
 
     /// <summary>optional</summary>
     public string? checkin_hora { get; set; }
@@ -88,11 +88,11 @@ public class ProdutoReservado
     public double total_suplementos { get; set; }
 
     /// <summary>mandatory</summary>
-    public string id_externo { get; set; }
+    public string id_externo { get; set; } = string.Empty;
     /// <summary>mandatory</summary>
     public int sistema_externo { get; set; }
     /// <summary>mandatory</summary>
-    public string refExterno { get; set; }
+    public string refExterno { get; set; } = string.Empty;
 
     /// <summary>mandatory</summary>
     public int id_ponto_partida { get; set; }
@@ -102,18 +102,18 @@ public class ProdutoReservado
     public int id_ponto_destino { get; set; }
 
     /// <summary>mandatory</summary>
-    public string nome_produto { get; set; }
+    public string nome_produto { get; set; } = string.Empty;
 
     /// <summary>mandatory</summary>
-    public string n_factura { get; set; }
+    public string n_factura { get; set; } = string.Empty;
     /// <summary>mandatory</summary>
-    public string obs_factura { get; set; }
+    public string obs_factura { get; set; } = string.Empty;
 
     /// <summary>mandatory</summary>
     public int id_disp_base { get; set; }
 
     /// <summary>mandatory</summary>
-    public string id_lugar { get; set; }
+    public string id_lugar { get; set; } = string.Empty;
 
     /// <summary>mandatory</summary>
     public decimal valor_comissao_suplementos { get; set; }
@@ -143,9 +143,9 @@ public class ProdutoReservado
     public int id_codigoDesconto { get; set; }
 
     /// <summary>mandatory</summary>
-    public string data_embarque { get; set; }
+    public string data_embarque { get; set; } = string.Empty;
     /// <summary>mandatory</summary>
-    public string data_desembarque { get; set; }
+    public string data_desembarque { get; set; } = string.Empty;
 
     /// <summary>mandatory</summary>
     public double descontoAutomatico { get; set; }

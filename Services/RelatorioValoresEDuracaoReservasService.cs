@@ -18,7 +18,7 @@ public class RelatorioValoresEDuracaoReservasService
         _context = context;
     }
 
-    public async Task<TotaisProdutoDto> GetTotaisLugarAsync(
+    public async Task<TotaisProdutoDto> GetTotaisProdutoAsync(
         TotaisQuery query,
         CancellationToken cancellationToken)
     {
@@ -40,6 +40,30 @@ public class RelatorioValoresEDuracaoReservasService
             totalDuracaoAno = totaisDuracaoProdutoAno.Sum(x => x.valor)
         };
     }
+
+    public async Task<TotaisProdutoDto> GetTotaisProdutoPorRefDispBaseAsync(
+        TotaisQuery query,
+        CancellationToken cancellationToken)
+    {
+        var linhas = await GetFilteredRowsAsync(query, cancellationToken);
+        var meses = BuildProductMonthsByRefDispBase(linhas, query);
+        var totaisValorProdutoAno = BuildProductYearTotalsByRefDispBase(linhas, useDuration: false)
+            .Where(produto => produto.valor != 0)
+            .ToList();
+        var totaisDuracaoProdutoAno = BuildProductYearTotalsByRefDispBase(linhas, useDuration: true)
+            .Where(produto => produto.valor != 0)
+            .ToList();
+
+        return new TotaisProdutoDto
+        {
+            meses = meses,
+            totaisValorProdutoAno = totaisValorProdutoAno,
+            totaisValorAno = totaisValorProdutoAno.Sum(x => x.valor),
+            totaisDuracaoProdutoAno = totaisDuracaoProdutoAno,
+            totalDuracaoAno = totaisDuracaoProdutoAno.Sum(x => x.valor)
+        };
+    }
+
 
     public async Task<TotaisLugarDto> GetTotaisLugarPorLugarAsync(
         TotaisQuery query,
@@ -100,6 +124,8 @@ public class RelatorioValoresEDuracaoReservasService
             relatorio = relatorio.Where(r => r.IdDispBase == query.idDispBase.Value);
         }
 
+        // Read the database rows first, then parse and filter dates in C#.
+        // The source table stores dates as strings, so this keeps the date logic predictable.
         var rows = await relatorio
             .Select(r => new
             {
@@ -149,6 +175,8 @@ public class RelatorioValoresEDuracaoReservasService
             return _context.RelatorioValoresEDuracaoReservas;
         }
 
+        // SQL Server can return float values for Valor. Casting here avoids precision problems
+        // when Entity Framework maps the value to decimal in the report model.
         return _context.RelatorioValoresEDuracaoReservas.FromSqlRaw(
             """
             SELECT
@@ -169,6 +197,8 @@ public class RelatorioValoresEDuracaoReservasService
 
     private static List<RelatorioMesTotaisLugarDto> BuildProductMonths(List<RelatorioLinha> linhas, TotaisQuery query)
     {
+        // One month can contain many products. First group by month, then group
+        // the rows inside that month by product.
         var meses = GroupByMonth(linhas)
             .Select(group => new RelatorioMesTotaisLugarDto
             {
@@ -223,8 +253,64 @@ public class RelatorioValoresEDuracaoReservasService
             .ToList();
     }
 
+    private static List<RelatorioMesTotaisLugarDto> BuildProductMonthsByRefDispBase(List<RelatorioLinha> linhas, TotaisQuery query)
+    {
+        var meses = GroupByMonth(linhas)
+            .Select(group => new RelatorioMesTotaisLugarDto
+            {
+                ano = group.Key.Ano,
+                mes = group.Key.Mes,
+                nome = GetMonthName(group.Key.Mes),
+                produtos = group
+                    .GroupBy(x => x.RefDispBase ?? string.Empty)
+                    .OrderBy(x => x.Key)
+                    .Select(x => new RelatorioProdutoMesDto
+                    {
+                        id = x.Key,
+                        nome = x.Key,
+                        valor = x.Sum(y => y.Valor),
+                        duracao = x.Sum(y => (decimal)y.Duracao)
+                    })
+                    .ToList(),
+                totalValorMes = group.Sum(x => x.Valor),
+                totalDuracaoMes = group.Sum(x => (decimal)x.Duracao)
+            })
+            .ToList();
+
+        if (meses.Count == 0 && TryGetSingleRequestedDate(query, out var requestedDate))
+        {
+            meses.Add(new RelatorioMesTotaisLugarDto
+            {
+                ano = requestedDate.Year,
+                mes = requestedDate.Month,
+                nome = GetMonthName(requestedDate.Month),
+                produtos = new List<RelatorioProdutoMesDto>(),
+                totalValorMes = 0m,
+                totalDuracaoMes = 0m
+            });
+        }
+
+        return meses;
+    }
+
+    private static List<RelatorioTotalProdutoAnoDto> BuildProductYearTotalsByRefDispBase(List<RelatorioLinha> linhas, bool useDuration)
+    {
+        return linhas
+            .GroupBy(r => r.RefDispBase ?? string.Empty)
+            .OrderBy(g => g.Key)
+            .Select(g => new RelatorioTotalProdutoAnoDto
+            {
+                id = g.Key,
+                nome = g.Key,
+                valor = useDuration ? g.Sum(x => (decimal)x.Duracao) : g.Sum(x => x.Valor)
+            })
+            .ToList();
+    }
+
     private static List<TotaisMesLugarDto> BuildPlaceMonths(List<RelatorioLinha> linhas, TotaisQuery query)
     {
+        // Places are grouped by both display name and DispBase reference because
+        // two places can have the same name but come from different bases.
         var meses = GroupByMonth(linhas)
             .Select(group => new TotaisMesLugarDto
             {

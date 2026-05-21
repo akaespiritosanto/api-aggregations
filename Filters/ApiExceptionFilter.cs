@@ -23,6 +23,8 @@ public sealed class ApiExceptionFilter : IExceptionFilter
     {
         var traceId = context.HttpContext.TraceIdentifier;
 
+        // Database concurrency errors happen when two requests try to update the
+        // same data at the same time.
         if (context.Exception is DbUpdateConcurrencyException)
         {
             LogMapped(context.Exception, StatusCodes.Status409Conflict, traceId);
@@ -42,6 +44,7 @@ public sealed class ApiExceptionFilter : IExceptionFilter
             return;
         }
 
+        // Database save errors are mapped to client-friendly HTTP responses.
         if (context.Exception is DbUpdateException dbUpdateException)
         {
             var (statusCode, title, detail) = MapDbUpdateException(dbUpdateException);
@@ -62,6 +65,8 @@ public sealed class ApiExceptionFilter : IExceptionFilter
             return;
         }
 
+        // ApiException is our own exception type for expected request problems
+        // such as bad query parameters or missing records.
         if (context.Exception is ApiException apiException)
         {
             _logger.LogWarning(
@@ -86,6 +91,7 @@ public sealed class ApiExceptionFilter : IExceptionFilter
             return;
         }
 
+        // Any other exception is unexpected. Show full details only in development.
         _logger.LogError(context.Exception, "Unhandled exception. TraceId={TraceId}", traceId);
 
         context.Result = new ObjectResult(new ProblemDetails
@@ -111,6 +117,8 @@ public sealed class ApiExceptionFilter : IExceptionFilter
     {
         if (exception.InnerException is SqlException sqlException)
         {
+            // SQL Server error numbers are stable. Mapping them here keeps the
+            // rest of the API from exposing raw database errors to users.
             return sqlException.Number switch
             {
                 547 => (

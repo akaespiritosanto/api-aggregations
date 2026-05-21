@@ -6,6 +6,7 @@
     <ImplicitUsings>enable</ImplicitUsings>
     <RootNamespace>api_aggregations</RootNamespace>
     <GenerateDocumentationFile>true</GenerateDocumentationFile>
+    <NoWarn>$(NoWarn);1591;NU1510</NoWarn>
   </PropertyGroup>
 
   <ItemGroup>
@@ -16,15 +17,29 @@
       <PrivateAssets>all</PrivateAssets>
     </PackageReference>
     <PackageReference Include="Microsoft.EntityFrameworkCore.SqlServer" Version="10.0.5" />
+    <PackageReference Include="Microsoft.VisualBasic" Version="10.3.0" />
+    <PackageReference Include="SharpZipLib.NETStandard" Version="1.0.7" />
+    <PackageReference Include="System.Diagnostics.EventLog" Version="6.0.0" />
     <PackageReference Include="Swashbuckle.AspNetCore" Version="6.6.2" />
   </ItemGroup>
 
   <ItemGroup>
+    <Reference Include="Expedita.Export.Excel">
+      <HintPath>excel\Expedita.Export.Excel.1.0.1\lib\netcoreapp3.1\Expedita.Export.Excel.dll</HintPath>
+    </Reference>
+    <Reference Include="Expedita.Runtime">
+      <HintPath>excel\Expedita.Runtime.1.0.2\lib\netcoreapp3.1\Expedita.Runtime.dll</HintPath>
+    </Reference>
+  </ItemGroup>
+
+  <ItemGroup>
     <Compile Remove="api-agregations.Tests\\**\\*.cs" />
+    <Compile Remove="excel\\Example\\**\\*.cs" />
     <Compile Remove="temp-obj\\**\\*.cs" />
     <Content Remove="api-agregations.Tests\\**" />
     <Content Remove="temp-obj\\**" />
     <None Remove="api-agregations.Tests\\**" />
+    <None Remove="excel\\Example\\**" />
     <None Remove="temp-obj\\**" />
   </ItemGroup>
 

@@ -21,6 +21,8 @@ public class ProdutoReservadoService
     {
         ValidateDateParts(ano, mes, dia);
 
+        // Totals can be requested by year, by month, or by day.
+        // The grouping level depends on which date filters were supplied.
         var produtos = await BuildTotalsRowsAsync(idEntidade, cancellationToken);
         var filteredProdutos = FilterTotalsRows(produtos, ano, mes, dia);
 
@@ -259,6 +261,7 @@ public class ProdutoReservadoService
         int? dia,
         int? idEntidade)
     {
+        // One DTO is used for year/month/day totals; unused date parts stay null.
         return new ProdutoReservadoTotalsDto
         {
             ano = ano,

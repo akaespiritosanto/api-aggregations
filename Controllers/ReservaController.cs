@@ -38,6 +38,8 @@ public class ReservaController : ControllerBase
         [FromQuery] int? id_vendedor,
         CancellationToken cancellationToken)
     {
+        // The controller only reads query parameters and delegates the work.
+        // Grouping/validation belongs in the service so it can be tested.
         var result = await _service.GetTotalsAsync(ano, mes, dia, id_vendedor, cancellationToken);
         return Ok(result);
     }
@@ -57,6 +59,7 @@ public class ReservaController : ControllerBase
     [ProducesResponseType(typeof(ProblemDetails), StatusCodes.Status500InternalServerError)]
     public async Task<ActionResult<PagedResult<Reserva>>> GetAll([FromQuery] ReservaQuery query, CancellationToken cancellationToken)
     {
+        // Query contains pagination and optional filters from the URL.
         var result = await _service.GetAllAsync(query, cancellationToken);
         return Ok(result);
     }
@@ -96,6 +99,8 @@ public class ReservaController : ControllerBase
         var created = await _service.CreateAsync(reserva, cancellationToken);
         _logger.LogInformation("Reserva created with id {Id}", created.id);
 
+        // CreatedAtAction returns HTTP 201 and tells the client where to fetch
+        // the new record afterwards.
         return CreatedAtAction(nameof(GetById), new { id = created.id }, created);
     }
 

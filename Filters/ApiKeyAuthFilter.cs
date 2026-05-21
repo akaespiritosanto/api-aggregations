@@ -19,11 +19,13 @@ public sealed class ApiKeyAuthFilter : IAsyncAuthorizationFilter
 
     public Task OnAuthorizationAsync(AuthorizationFilterContext context)
     {
+        // No configured key means local/development usage can continue without auth.
         if (string.IsNullOrWhiteSpace(_expectedApiKey))
         {
             return Task.CompletedTask;
         }
 
+        // Stop the request here when the key is missing or wrong.
         var providedApiKey = GetApiKeyFromRequest(context.HttpContext.Request);
         if (providedApiKey == _expectedApiKey)
         {

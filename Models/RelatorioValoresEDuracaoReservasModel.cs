@@ -2,8 +2,8 @@ namespace api_aggregations.Models;
 
 public class RelatorioValoresEDuracaoReservas
 {
-    public string DataInicio { get; set; }
-    public string DataFim { get; set; }
+    public string DataInicio { get; set; } = string.Empty;
+    public string DataFim { get; set; } = string.Empty;
 
     public int IdServico { get; set; }
     public int IdProduto { get; set; }
