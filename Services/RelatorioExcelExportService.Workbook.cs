@@ -62,7 +62,22 @@ public sealed partial class RelatorioExcelExportService
 
         for (var index = 0; index < tabela.Colunas.Count; index++)
         {
-            var nomeColuna = ObterNomeColunaExcel(tabela.Colunas[index]);
+            var colunaChave = tabela.Colunas[index];
+
+            // Prefer explicit display name supplied by the ExportTable (used
+            // to show refDispBase + nome for places). Fall back to the legacy
+            // column name normalization when not provided.
+            string nomeColuna;
+
+            if (tabela is { } && tabela.ColumnDisplayNames != null && tabela.ColumnDisplayNames.TryGetValue(colunaChave, out var display))
+            {
+                nomeColuna = display;
+            }
+            else
+            {
+                nomeColuna = ObterNomeColunaExcel(colunaChave);
+            }
+
             SetHeaderCell(pagina, 1, index + 1, nomeColuna);
         }
 
@@ -71,20 +86,14 @@ public sealed partial class RelatorioExcelExportService
 
     private static string ObterNomeColunaExcel(string nomeColuna)
     {
-        var nomeColunaMinusculas = nomeColuna.ToLowerInvariant();
-
-        // The database names may change slightly, so match by the important word.
-        if (nomeColunaMinusculas.Contains("secar"))
+        // Use the database value as the column name but normalize to title case
+        // for nicer Excel headers (keeps numeric suffixes intact).
+        if (string.IsNullOrWhiteSpace(nomeColuna))
         {
-            return "Maquina Secar 1";
+            return nomeColuna;
         }
 
-        if (nomeColunaMinusculas.Contains("lavar"))
-        {
-            return "Maquina Lavar 2";
-        }
-
-        return nomeColuna;
+        return CultureInfo.InvariantCulture.TextInfo.ToTitleCase(nomeColuna.ToLowerInvariant());
     }
 
     private static void PreencherMeses(xlsxPagina pagina, ExportTable tabela, int totalColunas)

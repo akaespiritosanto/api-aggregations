@@ -49,7 +49,8 @@ public sealed partial class RelatorioExcelExportService
     private sealed record ExportTable(
         List<string> Colunas,
         List<ExportRow> Linhas,
-        Dictionary<string, decimal> TotaisAno);
+        Dictionary<string, decimal> TotaisAno,
+        Dictionary<string, string> ColumnDisplayNames);
 
     private sealed class ExportRow
     {
